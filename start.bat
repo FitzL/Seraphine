@@ -1,1 +1,1 @@
-node .
+node mongo.js
