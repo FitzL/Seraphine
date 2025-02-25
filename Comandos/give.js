@@ -1,0 +1,24 @@
+module.exports = {
+    alias: ["give", "transfer", "dar"], //nombre del comando
+    descripcion: "Transfiere dinero", // que hace
+    costo: 0, //cuanto cuesta
+    callback: async (args, message, client, system) => {
+        let dbuser = message.author.dbuser;
+
+        let amount = args[0];
+            if (isNaN(amount)) amount = args[1];
+            if (amount > dbuser.currency) return message.reply("Pobre");
+
+        let target = message.mentions.users.first();
+            if (!target) return message.reply("Y a quien se lo mando?");
+        target = await system.mongoclient.findUser(target.id);
+            
+		await system.mongoclient.transferCurrency(dbuser._id, target._id, amount);
+
+		let embed = new system.embed()
+			.setColor(message.member.displayColor)
+			.setDescription("Has transferido " + amount + "" + system.currency + " a <@" + message.mentions.users.first() + ">!");
+
+		return message.channel.send({ embeds: [embed] });
+    }
+}

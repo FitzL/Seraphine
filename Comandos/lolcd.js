@@ -1,6 +1,7 @@
 module.exports = {
     alias: ["lolcd", "cooldown"], //nombre del comando
     descripcion: "", // que hace
+    costo: 0,
     callback: async (args, message, client, system) => {
         let cd = args[0];
         let ah = args[1];

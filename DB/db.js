@@ -1,36 +1,113 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+﻿const { MongoClient, ServerApiVersion } = require('mongodb');
 const { ip, port, dbname } = require('./db-settings.json');
 
 const uri = `mongodb://${ip}:${port}/`;
 
-class User {
+const xpDelay = 30_000;
+const xpDecay = 2;
+const randomXpDelay = 5_500;
+const xpRange = {
+    min: 1,
+    max: 3,
+    bias: 5
+}
+
+
+const workingHours = 60_000 * 10;
+const randomWorkDelay = 3;
+
+const basePay = 4;
+const payVariance = 2;
+
+class User{
     _id;
     username;
     xp;
     lvl;
     currency;
     lastActivity;
+    nextXp;
+    nextPay;
 
-    constructor(_id, _username) {
-        this.id = _id;
+    constructor(_id, _username, _xp = 0, _lvl, _currency = 0, _lastActivity = Date.now(), _nextXp = Date.now(), _nextPay) {
+        this._id = _id;
         this.username = _username;
 
-        this.xp = 0;
-        this.lvl = 0;
-        this.currency = 0;
-        this.lastActivity = Date.now();
-    }
-
-    #calculateLvl() {
-        return this.xp / 10;
-    }
-
-    updateLvl() {
+        this.xp = _xp;
+        this.currency = _currency;
         this.lvl = this.#calculateLvl();
+        this.lastActivity = _lastActivity;
+        this.nextXp = _nextXp;
+        this.nextPay = _nextPay;
     }
 
-    updateActivity() {
-        this.lastActivity = Date.now();
+    #calculateLvl(message, emoji) {
+        let lvl = ~~(((Math.log(this.xp / 2) + 1) / Math.log(2)) / 3) + 1;
+        // if (lvl != this.lvl && message) message.react(emoji)
+        return lvl;
+    }
+
+    #checkXpTimer() {
+        return this.lastActivity > this.nextXp;
+    }
+
+    #calculateXp() {
+        let gain = ~~((((Math.random() ** xpRange.bias)) * xpRange.max ) + xpRange.min);
+
+        let adjustedGain = (gain - ~~(gain * ((this.xp / 2_000) ** xpDecay)));
+
+        this.xp += adjustedGain;
+    }
+
+    #updatenextXp() {
+        this.nextXp = ( Date.now() + xpDelay + ~~((Math.random() * 2 - 1) * randomXpDelay));
+        return;
+    }
+
+    updateXp() {
+        if(!this.#checkXpTimer()) return this.xp;
+
+        this.#calculateXp();
+        this.#updatenextXp();
+        return this.xp;
+    }
+
+    updateLvl(message = null, emoji = null) {
+        this.#calculateLvl(message, emoji);
+        return this.lvl;
+    }
+
+    #randomWorkDelay() {
+        let delay = Math.random() * 1000 * 60 * randomWorkDelay;
+        return ~~delay;
+    }
+
+    #checkPayTime() {
+        return (this.lastActivity > this.nextPay);
+    }
+
+    #calculateIncome() {
+        this.nextPay = this.lastActivity + workingHours + this.#randomWorkDelay();
+        let pay = basePay + this.lvl - Math.floor(this.currency / 75);
+        let randomVariance = (Math.random() - .5) * payVariance * 2
+
+        pay -= Math.floor(randomVariance);
+
+        pay = pay < 0 ? 0 : pay;
+
+        console.log(this.username, " is getting paid! ", pay);
+
+        return pay;
+    }
+
+    async updateCurrency(discordmessage = null, reaction = "🧧") {
+        if (!this.#checkPayTime()) {
+            return this.currency;
+        }
+
+        // if (discordmessage) discordmessage.react(reaction);
+        this.currency += this.#calculateIncome(); 
+        return this.currency;
     }
 }
 
@@ -57,49 +134,62 @@ class mongodb {
     async connect() {
         await this.client.connect();
         await this.db.command({ ping: 1 });
-        console.log("Connected!");
+        return 0;
     }
 
     async disconnect() {
         await this.client.close();
         console.log("Disconnected!");
+        return 0;
     }
 
     async getAllUsers() {
         return this.users.find({}).toArray();
     }
 
-    async addUser (user) {
+    async findUser(userid) {
+        let user = await this.users.findOne({ _id: userid });
+        if (!user) throw "user not found";
+        return user;
+    }
+
+    async insertUser (user) {
         if (!user || user == null) return;
-        if (await this.findUser(user.id)) return console.error("user already exists");
+        if (await this.findUser(user._id).catch(() => { console.log })) throw "user already exists";
         await this.users.insertOne(user);
     }
 
-    async findUser(userid) {
-        return this.users.findOne({ id: userid });
+    async updateUser (id, field, content) {
+        if (!field || !id) throw "missing field or id";
+
+        await this.users.updateOne({_id: id}, {$set: {[field]: content}})
     }
 
     async deleteUser(user) {
-        if (user)
+        findUser(user._id);
+        this.users.deleteOne(user._id);
+        return;
+    }
+
+    async transferCurrency(_alice, _bob, amount = 0) {
+        let alice = await this.findUser(_alice);
+        let bob = await this.findUser(_bob);
+
+        if (isNaN(amount)) throw "NaN";
+
+        if (amount < 1) throw "Negative";
+
+        if (!alice || !bob) throw "Couldn't find users";
+        if (amount > alice.currency) throw "BROKE";
+
+        amount = parseInt(amount);
+
+        alice.currency -= amount; await this.updateUser(alice._id, "currency", alice.currency);
+        bob.currency += amount; await this.updateUser(bob._id, "currency", bob.currency);
     }
 }
 
 let db = new mongodb();
-
-let test = new User(1, 'fitz');
-
-async function main() {
-
-    await db.connect();
-
-    await db.addUser(test);
-
-    console.log(await db.getAllUsers());
-
-    await db.disconnect();
-}
-
-main();
 
 module.exports.mongoClient = db;
 module.exports.dbUser = User;
