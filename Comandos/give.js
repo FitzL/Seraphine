@@ -4,6 +4,7 @@ module.exports = {
     costo: 0, //cuanto cuesta
     callback: async (args, message, client, system) => {
         let dbuser = message.author.dbuser;
+        let error = false
 
         let amount = args[0];
             if (isNaN(amount)) amount = args[1];
@@ -13,8 +14,14 @@ module.exports = {
             if (!target) return message.reply("Y a quien se lo mando?");
         target = await system.mongoclient.findUser(target.id);
             
-		await system.mongoclient.transferCurrency(dbuser._id, target._id, amount);
+        await system.mongoclient.transferCurrency(dbuser._id, target._id, amount).catch((e) => {
+            error = true
+            if (e == "A_AND_B_ARE_EQUAL") {
+                return message.reply("'tas pendejo?");
+            }
+        });
 
+        if (error) throw "err";
 		let embed = new system.embed()
 			.setColor(message.member.displayColor)
 			.setDescription("Has transferido " + amount + "" + system.currency + " a <@" + message.mentions.users.first() + ">!");

@@ -26,8 +26,18 @@ let rechazos = [
     "Puto"
 ];
 
+let sereneRechazos = [
+    "Como estás bebe?",
+    "holi wapa",
+    "neko hug",
+    "neko kc",
+    "no <3",
+    "si :D"
+]
+
 var message;
-var prefix = "s!";
+const prefix = "s.";
+const altPrefix = "sera";
 
 var sistema = {
     ultimoPersonaje: ultimoPersonaje,
@@ -38,8 +48,12 @@ var sistema = {
     currency: "🥖",
     embed: EmbedBuilder,
     getMember: getMember,
-    lockdown: false
+    lockdown: false,
+    sanitise: sanitise,
 }
+
+const everyjuan = new RegExp("@everyone" + "|@here");
+const balatro = new RegExp("balatro|poker|jimbo|apuesta");
 
 // const { REST, Routes} = require('discord.js');
 // const rest = new REST({ version: '10' }).setToken(token);
@@ -80,16 +94,19 @@ client.on('interactionCreate', async interaction => {
 
 client.on('messageCreate', async (_message) => {
     message = _message;
+    let wasMessageACommand = false;
+    let wasPrefixNotUsed = false;
     let messageDate = new Date(message.createdTimestamp);
 
     if (message.author.bot && message.author.id != "1316479184050192384") return;
 
-    let messageTokens = message.content.split(/\s+/);
+    let messageTokens = sanitise(message.content).split(/\s+/);
 
     console.log(`${message.author.username} @` + messageDate.getHours() + ":" + messageDate.getMinutes());
 
     // find bot member object in server
     client.member = await message.guild.members.fetch(client.user.id);
+    const ser = new RegExp("<@1316479184050192384>|1316479184050192384|" + client.member.nickname.toLowerCase() + "|" + client.user.username.toLowerCase());
 
     // find message author in db
     let dbuser = await mongoClient.findUser(message.author.id).catch((e) => { console.log });
@@ -122,16 +139,12 @@ client.on('messageCreate', async (_message) => {
     await handleUserUpdates(message.author.dbuser).then(async (_update) => { update = _update });
     message.author.dbuser = update.user;
 
-    //notifs
-    //if (update.lvlup) await message.react("🆙");
-
-
     if (message.author.bot) return;
 
     //react if mentioned
-    let ser = new RegExp("<@1316479184050192384>|1316479184050192384|" + client.member.nickname + "|" + client.user.username);
 
-    if (message.content.match(ser)) message.react("<:gatowtf:1129239829549420584>");
+    if (message.content.toLowerCase().match(ser)) message.react("<:gatowtf:1129239829549420584>");
+    if (message.content.toLowerCase().match(balatro)) message.react("🃏");
 
     //escape if no prefix (may changed it later)
     if (messageTokens.length < 1) return; //check for empty messages
@@ -142,14 +155,17 @@ client.on('messageCreate', async (_message) => {
         command = messageTokens[0].slice(prefix.length);
         messageTokens.shift();
     }
-    else if (messageTokens[0].toLowerCase() == "sera" || messageTokens[0].toLowerCase() == "s!") {
+    else if (messageTokens[0].toLowerCase() == altPrefix || messageTokens[0].toLowerCase() == prefix) {
         command = messageTokens[1];
         messageTokens.shift();
         messageTokens.shift();
     }
-    else return;
+    else wasPrefixNotUsed = true;
+
 
     for (const commandOptions of comandos) {
+        if (wasPrefixNotUsed) break;
+        if (!command) break;
         //the things we care about commands
         let {
             alias,
@@ -164,12 +180,7 @@ client.on('messageCreate', async (_message) => {
         for (const _alias of alias) {
             //escape loop
             if (command.toLowerCase() != _alias) continue;
-
-            //just fucks with the user 
-            // this really just fucks with me more than any random user
-            if (Math.random() < 0.075) {
-                return message.reply(rechazos[~~(rechazos.length * Math.random())])
-            };
+            wasMessageACommand = true;
 
             //limit who can mess with wip commands
             if (testing && (message.author.id != ownerid)) {
@@ -192,7 +203,7 @@ client.on('messageCreate', async (_message) => {
                         message.channel.send("<:raoralaugh:1343492065954103336>");
                         setTimeout(() => {
                             m.reply("Pero lo haría por unos " + costo + sistema.currency + " :3");
-                        }, 2_000);
+                        }, 3_000);
                     });
 
                     throw "not enough funds";
@@ -202,16 +213,19 @@ client.on('messageCreate', async (_message) => {
                 // run command callback, may return a reply to the user
                 await callback(messageTokens, message, client, sistema).catch(e => {
                     console.log(e);
+                    if (e == "pifia") return costo = ~~(costo/3);
                     cobrar = false;
+                    if (e == "rechazo") return message.reply(rechazos[~~(Math.random() * rechazos)])
                 }).then(async () => {
                     // actually take the fee
                     if (cobrar) {
+                        console.log("-", costo);
                         let embed = new EmbedBuilder()
                             .setColor(client.member.displayColor)
                             .setDescription("-" + costo + sistema.currency)
 
-                        await mongoClient.transferCurrency(message.author.id, client.user.id, costo); //taxes
-                        message.channel.send({embeds: [embed]});
+                        await mongoClient.transferCurrency(_message.author.id, client.user.id, costo); //taxes
+                        _message.channel.send({embeds: [embed]});
                     }
                 });
                 //if (reply) message.reply(reply);
@@ -223,7 +237,22 @@ client.on('messageCreate', async (_message) => {
             tiempoDesdeUltimoComando = Date.now();
             break;
         }
+    }
 
+    console.log(wasMessageACommand);
+
+    if (message.mentions.members.first() == client.member.id && !wasMessageACommand) {
+        message.reply(
+            "Holi, para  usar comandos escribe `" +
+            altPrefix +
+            "` <comando> o `" +
+            prefix +
+            "`<comando>\n-# " +
+            altPrefix +
+            " p, o , " +
+            prefix +
+            "p. Por ejemplo :3"
+        );
     }
 })
 
@@ -267,4 +296,8 @@ async function handleUserUpdates(user) {
         user: updateduser,
         lvlup: lvlup
     };
+}
+
+function sanitise(str) {
+    return str.replace(everyjuan, "`no`");
 }

@@ -13,10 +13,10 @@ const xpRange = {
 }
 
 
-const workingHours = 60_000 * 10;
+const workingHours = 60_000 * 25;
 const randomWorkDelay = 3;
 
-const basePay = 4;
+const basePay = 5;
 const payVariance = 2;
 
 class User{
@@ -172,6 +172,8 @@ class mongodb {
     }
 
     async transferCurrency(_alice, _bob, amount = 0) {
+        if (_alice == _bob) throw "A_AND_B_ARE_EQUAL";
+        console.log(`alice(${_alice}) is sending ` + amount + ` to bob(${_bob}).`)
         let alice = await this.findUser(_alice);
         let bob = await this.findUser(_bob);
 

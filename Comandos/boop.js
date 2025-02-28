@@ -16,7 +16,7 @@ module.exports = {
             throw "user not found";
         };
 
-        await message.channel.send("boop <@" + target.id + ">");
+        await message.channel.send("_boop_ <@" + target.id + ">");
         message.delete();
     }
 }
