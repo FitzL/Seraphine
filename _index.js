@@ -12,7 +12,7 @@ const client = new Client({
     ]
 });
 
-const { ownerid, token } = require('./secret.json');
+const { ownerid, token, botadmins } = require('./secret.json');
 const { dbUser, mongoClient } = require('./db/db.js');
 let comandos = [];
 let tiempoDesdeUltimoComando = Date.now();
@@ -50,6 +50,9 @@ var sistema = {
     getMember: getMember,
     lockdown: false,
     sanitise: sanitise,
+    commands: undefined,
+    prefix: prefix,
+    altPrefix: altPrefix,
 }
 
 const everyjuan = new RegExp("@everyone" + "|@here");
@@ -86,6 +89,8 @@ client.on('ready', async () => {
         sistema.currency = sistema.serafin.serverCurrency;
         sistema.lockdown = sistema.serafin.lockdown;
     });
+
+    sistema.commands = comandos;
 })
 
 client.on('interactionCreate', async interaction => {
@@ -102,7 +107,7 @@ client.on('messageCreate', async (_message) => {
 
     let messageTokens = sanitise(message.content).split(/\s+/);
 
-    console.log(`${message.author.username} @` + messageDate.getHours() + ":" + messageDate.getMinutes());
+    console.log(`${message.author.username} @` + messageDate.getHours().toString().padStart(2, "0") + ":" + messageDate.getMinutes().toString().padStart(2, "0"));
 
     // find bot member object in server
     client.member = await message.guild.members.fetch(client.user.id);
@@ -183,7 +188,7 @@ client.on('messageCreate', async (_message) => {
             wasMessageACommand = true;
 
             //limit who can mess with wip commands
-            if (testing && (message.author.id != ownerid)) {
+            if (testing && (!botadmins.includes(message.author.id))) {
                 message.reply("No, jodete.");
                 message.channel.send("<:ayweno:1167952675158110308>");
                 return;
@@ -194,10 +199,10 @@ client.on('messageCreate', async (_message) => {
                 return message.reply("Dame un segundo.").then(m => { setTimeout(() => { m.delete() }, 3_500) });
             }
 
-            try {
+            try {   
                 //manage commands with a price
                 if (costo > 0) cobrar = true;
-                console.log(costo);
+                if (isNaN(message.author.dbuser.currency) == true) return message.reply("<@443966554078707723> hiciste algo mal, pendejo. Alguien tiene NaN" + sistema.currency);
                 if (costo > message.author.dbuser.currency && cobrar) {
                     message.reply("No le hago caso a gente pobre").then(m => {
                         message.channel.send("<:raoralaugh:1343492065954103336>");
@@ -219,7 +224,7 @@ client.on('messageCreate', async (_message) => {
                 }).then(async () => {
                     // actually take the fee
                     if (cobrar) {
-                        console.log("-", costo);
+                        console.log("-" + costo);
                         let embed = new EmbedBuilder()
                             .setColor(client.member.displayColor)
                             .setDescription("-" + costo + sistema.currency)
@@ -239,9 +244,7 @@ client.on('messageCreate', async (_message) => {
         }
     }
 
-    console.log(wasMessageACommand);
-
-    if (message.mentions.members.first() == client.member.id && !wasMessageACommand) {
+    if (message.mentions.members.first() == client.member.id && !wasMessageACommand && !message.mentions.repliedUser) {
         message.reply(
             "Holi, para  usar comandos escribe `" +
             altPrefix +

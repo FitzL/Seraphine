@@ -1,4 +1,4 @@
-module.exports = {
+﻿module.exports = {
     alias: ["setmoney", "imprimir"], //nombre del comando
     descripcion: "Ajusta manualmente el dinero", // que hace
     testing: true,
@@ -11,9 +11,8 @@ module.exports = {
             dbuser = await system.mongoclient.findUser(message.mentions.users.first().id)
         };
 
-        let amount = parseInt(args[0]);
-            
-        console.log(amount);
+        let amount = isNaN(parseInt(args[0])) ? parseInt(args[1]): parseInt(args[0]);
+        if (isNaN(amount)) return message.reply("'Che, cuanto le querés poner?")
 
         await system.mongoclient.updateUser(dbuser._id, "currency", amount);
 

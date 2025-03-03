@@ -1,4 +1,4 @@
-module.exports = {
+﻿module.exports = {
     alias: ["perfil", "p", "profile"], //nombre del comando
     descripcion: "muestra el perfil", // que hace
     costo: 0, //cuanto cuesta
@@ -31,9 +31,8 @@ module.exports = {
                 { name: "Plata", value: user.currency.toString() + system.currency, inline: true },
                 { name: "XP", value: user.xp.toString(), inline: true },
                 { name: "Lvl", value: user.lvl.toString(), inline: true },
-                { name: "Cajas", value: "Todav�a no las meto", inline: true }
+                { name: "Cajas", value: `Todavía no las meto`, inline: true }
             );
-
         message.channel.send({ embeds: [embed]})
     }
 }

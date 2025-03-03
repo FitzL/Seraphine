@@ -1,14 +1,14 @@
 ﻿module.exports = {
     alias: ["name", "nombrar", "apodo"],
     descripcion: "Cambia el nickname de otro usuario.",
-    costo: 7,
+    costo: 10,
     callback: async (args, message, client, system) => {
-        let id = args.shift();
-
-        // try to catch the first user mention in message
+        let id = args[0];
         let target = message.mentions.users.first();
-        // if no mentions treat first argument like an id
+
         target = target ? await system.getMember(target.id) : await system.getMember(id);
+
+        if (!message.mentions.replieduser) args.shift();
 
         if (!target) {
             message.reply("Ni idea de quien hablas.");

@@ -1,4 +1,4 @@
-module.exports = {
+﻿module.exports = {
     alias: ["give", "transfer", "dar"], //nombre del comando
     descripcion: "Transfiere dinero", // que hace
     costo: 0, //cuanto cuesta
@@ -7,7 +7,7 @@ module.exports = {
         let error = false
 
         let amount = args[0];
-            if (isNaN(amount)) amount = args[1];
+            if (isNaN(parseInt(amount))) amount = args[1];
             if (amount > dbuser.currency) return message.reply("Pobre");
 
         let target = message.mentions.users.first();
@@ -15,16 +15,27 @@ module.exports = {
         target = await system.mongoclient.findUser(target.id);
             
         await system.mongoclient.transferCurrency(dbuser._id, target._id, amount).catch((e) => {
-            error = true
-            if (e == "A_AND_B_ARE_EQUAL") {
-                return message.reply("'tas pendejo?");
+            console.log;
+            error = true;
+            switch (e) {
+                case "A_AND_B_ARE_EQUAL":
+                    return message.reply("'tas pendejo?");
+                    break;
+                case "NEGATIVE":
+                    return message.reply("?");
+                    break;
+                case "NAN":
+                    return message.reply("'Che, cuanto le querés mandar?");
+                    break;
+                default:
+                    break;
             }
         });
 
         if (error) throw "err";
 		let embed = new system.embed()
 			.setColor(message.member.displayColor)
-			.setDescription("Has transferido " + amount + "" + system.currency + " a <@" + message.mentions.users.first() + ">!");
+			.setDescription("Has transferido " + ~~amount + "" + system.currency + " a <@" + message.mentions.users.first() + ">!");
 
 		return message.channel.send({ embeds: [embed] });
     }

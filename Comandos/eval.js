@@ -1,3 +1,5 @@
+﻿exec = require("child_process").execFile;	
+
 module.exports = {
 	alias: ["sudo", "eval"],
 	descripcion: "Corre codigo arbitrario",

@@ -42,7 +42,7 @@ class User{
     }
 
     #calculateLvl(message, emoji) {
-        let lvl = ~~(((Math.log(this.xp / 2) + 1) / Math.log(2)) / 3) + 1;
+        let lvl = ~~(((Math.log(this.xp / 2) + 1) / Math.log(2)) / 2.5) + 1;
         // if (lvl != this.lvl && message) message.react(emoji)
         return lvl;
     }
@@ -177,11 +177,11 @@ class mongodb {
         let alice = await this.findUser(_alice);
         let bob = await this.findUser(_bob);
 
-        if (isNaN(amount)) throw "NaN";
+        if (isNaN(amount)) throw "NAN";
 
-        if (amount < 1) throw "Negative";
+        if (amount < 1) throw "NEGATIVE";
 
-        if (!alice || !bob) throw "Couldn't find users";
+        if (!alice || !bob) throw "USER_NOT_FOUND";
         if (amount > alice.currency) throw "BROKE";
 
         amount = parseInt(amount);

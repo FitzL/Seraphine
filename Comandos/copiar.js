@@ -1,16 +1,23 @@
-module.exports = {
+﻿module.exports = {
     alias: ["imitar", "copy"], //can have multiple but would recommend keeping it under two
-    descripcion: "Me hago pasar por alguien m�s.", //shouldn't exceed two lines.
+    descripcion: "Me hago pasar por alguien más.", //shouldn't exceed two lines.
     costo: 15,
     test: false,
     callback: async (args, message, client, system) => {
-        let target = message.mentions.members.first();
+        let id = args[0];
+        let target = message.mentions.users.first();
+
+        target = target ? await system.getMember(target.id) : await system.getMember(id);
+
         if (!message.mentions.replieduser) args.shift();
+
         if (!target) {
-            return message.reply("No se a quien impersonar...");
+            message.reply("No se a quien impersonar...");
+            throw "error";
         }
         if (!args[0]) {
-            return message.reply("No se que quieres que diga...");
+            message.reply("No se que quieres que diga...");
+            throw "error";
         }
 
 
