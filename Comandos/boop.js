@@ -5,8 +5,7 @@
     testing: false, //se está probando?
     callback: async (args, message, client, system) => {
         let id = args.shift();
-        let target = message.mentions.users.first();
-        target = target ? await system.getMember(target.id) : await system.getMember(id);
+        let target = message.mentions.users.first() || await system.findOneMember(id);
 
         if (!target) {
             message.reply("Ni idea de quien hablas.");

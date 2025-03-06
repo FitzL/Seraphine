@@ -5,22 +5,19 @@
     testing: false, //se está probando?
     callback: async (args, message, client, system) => {
         let _message = await message.reply("Pong!");
-        let startTime = message.createdTimestamp;
-        await _message.edit("Pong! " + (_message.createdTimestamp - startTime) + "ms.");
 
-        console.log(prettierPing(startTime, _message.createdTimestamp));
-    }
-}
+        let pingMessageTime = message.createdTimestamp; //1
+        let messageStartProcessing = system.pingTime; //2
+        let messageSentTime = _message.createdTimestamp; //3
 
-function prettierPing(timeA, timeB) {
-    let dateA = new Date(timeA);
-    let dateB = new Date(timeB);
+        let recieveTime = Math.abs(messageStartProcessing - pingMessageTime);
+        let processTime = Math.abs(messageSentTime - messageStartProcessing);
+        let totalTime = Math.abs(messageSentTime - pingMessageTime);
 
-    let secondStampA = dateA.getSeconds().toString().padStart(2, "0") + "." + dateA.getMilliseconds().toString().padStart(3, "0");
-    let secondStampB = dateB.getSeconds().toString().padStart(2, "0") + "." + dateB.getMilliseconds().toString().padStart(3, "0");
-
-    return {
-        timeA: secondStampA,
-        timeB: secondStampB
+        await _message.edit("Pong! " +
+            "\n-# Tiempo en recibir el mensaje: " + (recieveTime).toString() +
+            "\n-# Tiempo en procesar el mensaje: " + (processTime).toString() +
+            "\n-# Tiempo total: " + (totalTime).toString()
+        );
     }
 }

@@ -4,9 +4,7 @@
     costo: 10,
     callback: async (args, message, client, system) => {
         let id = args[0];
-        let target = message.mentions.users.first();
-
-        target = target ? await system.getMember(target.id) : await system.getMember(id);
+        let target = message.mentions.users.first() || await system.findOneMember(id);
 
         if (!message.mentions.replieduser) args.shift();
 

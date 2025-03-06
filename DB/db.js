@@ -16,7 +16,7 @@ const xpRange = {
 const workingHours = 60_000 * 25;
 const randomWorkDelay = 3;
 
-const basePay = 5;
+const basePay = 3;
 const payVariance = 2;
 
 class User{
@@ -28,8 +28,9 @@ class User{
     lastActivity;
     nextXp;
     nextPay;
+    cajas;
 
-    constructor(_id, _username, _xp = 0, _lvl, _currency = 0, _lastActivity = Date.now(), _nextXp = Date.now(), _nextPay) {
+    constructor(_id, _username, _xp = 0, _lvl, _currency = 0, _lastActivity = Date.now(), _nextXp = Date.now(), _nextPay, _cajas = 1) {
         this._id = _id;
         this.username = _username;
 
@@ -39,6 +40,7 @@ class User{
         this.lastActivity = _lastActivity;
         this.nextXp = _nextXp;
         this.nextPay = _nextPay;
+        this.cajas = _cajas;
     }
 
     #calculateLvl(message, emoji) {
@@ -88,7 +90,7 @@ class User{
 
     #calculateIncome() {
         this.nextPay = this.lastActivity + workingHours + this.#randomWorkDelay();
-        let pay = basePay + this.lvl - Math.floor(this.currency / 75);
+        let pay = basePay + this.lvl - Math.floor(this.currency / 100);
         let randomVariance = (Math.random() - .5) * payVariance * 2
 
         pay -= Math.floor(randomVariance);

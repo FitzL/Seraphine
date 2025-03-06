@@ -2,12 +2,11 @@
     alias: ["imitar", "copy"], //can have multiple but would recommend keeping it under two
     descripcion: "Me hago pasar por alguien más.", //shouldn't exceed two lines.
     costo: 15,
-    test: false,
+    test: true,
     callback: async (args, message, client, system) => {
         let id = args[0];
-        let target = message.mentions.users.first();
-
-        target = target ? await system.getMember(target.id) : await system.getMember(id);
+        let target = message.mentions.users.first() || await system.findOneMember(id);
+        console.log(target);
 
         if (!message.mentions.replieduser) args.shift();
 

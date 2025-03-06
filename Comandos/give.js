@@ -5,12 +5,13 @@
     callback: async (args, message, client, system) => {
         let dbuser = message.author.dbuser;
         let error = false
+        notamount = 1;
 
         let amount = args[0];
-            if (isNaN(parseInt(amount))) amount = args[1];
+        if (isNaN(parseInt(amount))) { amount = args[1]; notamount-- };
             if (amount > dbuser.currency) return message.reply("Pobre");
 
-        let target = message.mentions.users.first();
+        let target = message.mentions.users.first() || await system.findOneMember(args[notamount]);
             if (!target) return message.reply("Y a quien se lo mando?");
         target = await system.mongoclient.findUser(target.id);
             
@@ -35,7 +36,7 @@
         if (error) throw "err";
 		let embed = new system.embed()
 			.setColor(message.member.displayColor)
-			.setDescription("Has transferido " + ~~amount + "" + system.currency + " a <@" + message.mentions.users.first() + ">!");
+			.setDescription("Has transferido " + ~~amount + "" + system.currency + " a <@" + target._id + ">!");
 
 		return message.channel.send({ embeds: [embed] });
     }

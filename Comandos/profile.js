@@ -6,7 +6,9 @@
         let user = message.author.dbuser;
         let discorduser = message.member;
 
-        let target = message.mentions.members.first();
+        let target = message.mentions.members.first() || await system.findOneMember(args[0]);
+
+        console.log(target)
 
         if (target) { 
             try  {
@@ -31,7 +33,7 @@
                 { name: "Plata", value: user.currency.toString() + system.currency, inline: true },
                 { name: "XP", value: user.xp.toString(), inline: true },
                 { name: "Lvl", value: user.lvl.toString(), inline: true },
-                { name: "Cajas", value: `Todavía no las meto`, inline: true }
+                { name: "Cajas", value: user.cajas.toString(), inline: true }
             );
         message.channel.send({ embeds: [embed]})
     }

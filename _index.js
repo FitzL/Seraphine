@@ -53,10 +53,12 @@ var sistema = {
     commands: undefined,
     prefix: prefix,
     altPrefix: altPrefix,
+    pingTime: 0,
+    findOneMember: findOneMember,
 }
 
 const everyjuan = new RegExp("@everyone" + "|@here");
-const balatro = new RegExp("balatro|poker|jimbo|apuesta");
+const balatro = new RegExp("balatro|poker|jimbo");
 
 // const { REST, Routes} = require('discord.js');
 // const rest = new REST({ version: '10' }).setToken(token);
@@ -98,6 +100,7 @@ client.on('interactionCreate', async interaction => {
 })
 
 client.on('messageCreate', async (_message) => {
+    sistema.pingTime = Date.now();
     message = _message;
     let wasMessageACommand = false;
     let wasPrefixNotUsed = false;
@@ -133,6 +136,7 @@ client.on('messageCreate', async (_message) => {
             dbuser.lastActivity,
             dbuser.nextXp,
             dbuser.nextPay,
+            dbuser.cajas,
         );
     }
 
@@ -261,13 +265,61 @@ client.on('messageCreate', async (_message) => {
 
 client.login(token);
 
-//helper functions
+// helper functions
 
-function getMember(id) {
+// get a member from id
+async function getMember(id) {
     if (!id) return null;
-    return message.guild.members.fetch(id);
+    let member = message.guild.members.fetch(id).catch((err) => { console.log });
+
+    return member;
 }
 
+// get a member from a string
+async function findOneMember(keyword) {
+    if (!keyword) return null;
+    keyword = keyword.toLowerCase();
+
+    let guildMembers = Array.from(await message.guild.members.fetch());
+    let users = [];
+
+    guildMembers.forEach((member, id) => {
+        users.push(
+            {
+                id: member[1].id,
+                username: member[1].user.username,
+                nickname: member[1].user.globalName,
+                displayName: member[1].displayName,
+            }
+        )
+    })
+
+    let primerMatch = null;
+
+    await users.forEach(async (user) => {
+        if (user.id.match(keyword) || user.displayName.toLowerCase().match(keyword) ||  user.username.toLowerCase().match(keyword) || (user.nickname && user.nickname.toLowerCase().match(keyword))) {
+            primerMatch = user.id;
+            return;
+        }
+    })
+    console.log("looking for: ", keyword);
+    console.log("found: ", primerMatch)
+    return await getMember(primerMatch);
+}
+
+//get a member from string or id
+/*
+
+async function findOneMember(snowflake) {
+    let member = await getMember(snowflake);
+    console.log(member);
+    if (!member) member = await findOneMemberFromString(snowflake);
+    return member;
+}
+
+*/
+
+// handle mongodb user updates
 async function handleUserUpdates(user) {
     let prevLvl = user.lvl;
 
@@ -290,7 +342,8 @@ async function handleUserUpdates(user) {
         updateduser.currency,
         updateduser.lastActivity,
         updateduser.nextXp,
-        updateduser.nextPay
+        updateduser.nextPay,
+        updateduser.cajas,
     );
 
     let lvlup = updateduser.lvl > prevLvl;
@@ -301,6 +354,7 @@ async function handleUserUpdates(user) {
     };
 }
 
+//clean a string from having @everyone
 function sanitise(str) {
     return str.replace(everyjuan, "`no`");
 }
