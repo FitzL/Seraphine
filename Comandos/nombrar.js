@@ -1,10 +1,10 @@
 ﻿module.exports = {
     alias: ["name", "nombrar", "apodo"],
     descripcion: "Cambia el nickname de otro usuario.",
-    costo: 10,
+    costo: 20,
     callback: async (args, message, client, system) => {
         let id = args[0];
-        let target = message.mentions.users.first() || await system.findOneMember(id);
+        let target = message.mentions.members.first() || await system.findOneMember(id);
 
         if (!message.mentions.replieduser) args.shift();
 

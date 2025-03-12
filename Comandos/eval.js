@@ -3,6 +3,7 @@
 module.exports = {
 	alias: ["sudo", "eval"],
 	descripcion: "Corre codigo arbitrario",
+	testing: true,
 	costo: 0,
 	callback: async (args, message, client, system) => {
 		if (system.onwerid != message.author.id) {

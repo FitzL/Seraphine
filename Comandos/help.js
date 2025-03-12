@@ -11,13 +11,17 @@
 
         system.commands.filter(c => c.descripcion).forEach(c => {
             if (c.testing) return;
-            help.push([c.alias, c.descripcion]);
+            help.push([c.alias, c.descripcion, c.costo]);
             if (target) {
                 if (c.alias.some(a => a === target.toLowerCase())) targetHelp = c.descripcion;
             }
         });
 
-        help.forEach(h => { availableCommands.push("`" + h[0].join("/") + "`\n") })
+        help.forEach(h => {
+            let handle = h[2] + system.currency + " `" + h[0].join("/") + "`\n";
+            if (h[2] == 0 || !h[2]) handle = "(gratis)" + system.currency + " `" + h[0].join("/") + "`\n";
+            availableCommands.push(handle)
+        })
 
         let box = new system.embed()
             .setTitle(system.prefix + "help <command>")

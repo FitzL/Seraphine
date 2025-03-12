@@ -1,10 +1,13 @@
-module.exports = {
+﻿module.exports = {
     alias: ["kill"], //nombre del comando
     descripcion: "quick reset", // que hace
-    costo: 0, //cuanto cuesta
-    testing: true, //se est� probando?
+    costo: 50, //cuanto cuesta
+    testing: false, //se está probando?
     callback: async (args, message, client, system) => {
         await message.reply("_AGHHHHHHHHH_ \n-# se muere en linda");
-        process.kill(0);
+        if (message.author.id == "443966554078707723") throw "owner";
+        setTimeout(() => {
+            process.kill(0);
+        }, 1_0000)
     }
 }

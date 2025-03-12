@@ -1,7 +1,7 @@
 ﻿module.exports = {
     alias: ["silenciogil", "silencio", "calla"], //nombre del comando
     descripcion: "boop", // que hace
-    costo: 25, //cuanto cuesta
+    costo: 30, //cuanto cuesta
     testing: false, //se está probando?
     callback: async (args, message, client, system) => {
         let id = args.shift();
@@ -21,14 +21,14 @@
 
         if (target.id == client.user.id) {
             message.reply("Pero si eesa soy yo?");
-            throw "pifia";
+            throw "PIFIA";
             return;
         }
 
         if (troll) {
             target = message.member;
-            await target.timeout(20_000, 'kyc').catch(async (err) => {
-                await message.channel.send(":p");
+            await target.timeout(15_000, 'kyc').catch(async (err) => {
+                await message.channel.send("no?");
                 message.delete();
                 throw err;
             })

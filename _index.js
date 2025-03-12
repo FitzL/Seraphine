@@ -208,10 +208,10 @@ client.on('messageCreate', async (_message) => {
                 if (costo > 0) cobrar = true;
                 if (isNaN(message.author.dbuser.currency) == true) return message.reply("<@443966554078707723> hiciste algo mal, pendejo. Alguien tiene NaN" + sistema.currency);
                 if (costo > message.author.dbuser.currency && cobrar) {
-                    message.reply("No le hago caso a gente pobre").then(m => {
+                    message.channel.send("No le hago caso a gente pobre").then(m => {
                         message.channel.send("<:raoralaugh:1343492065954103336>");
                         setTimeout(() => {
-                            m.reply("Pero lo haría por unos " + costo + sistema.currency + " :3");
+                            message.reply("Pero lo haría por unos " + costo + sistema.currency + " :3");
                         }, 3_000);
                     });
 
@@ -222,9 +222,9 @@ client.on('messageCreate', async (_message) => {
                 // run command callback, may return a reply to the user
                 await callback(messageTokens, message, client, sistema).catch(e => {
                     console.log(e);
-                    if (e == "pifia") return costo = ~~(costo/3);
+                    if (e == "PIFIA") return costo = ~~(costo/3);
                     cobrar = false;
-                    if (e == "rechazo") return message.reply(rechazos[~~(Math.random() * rechazos)])
+                    if (e == "RECHAZO") return message.reply(rechazos[~~(Math.random() * rechazos)])
                 }).then(async () => {
                     // actually take the fee
                     if (cobrar) {

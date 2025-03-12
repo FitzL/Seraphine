@@ -7,13 +7,13 @@ const xpDelay = 30_000;
 const xpDecay = 2;
 const randomXpDelay = 5_500;
 const xpRange = {
-    min: 1,
-    max: 3,
+    min: 2,
+    max: 4,
     bias: 5
 }
 
 
-const workingHours = 60_000 * 25;
+const workingHours = 60_000 * 30;
 const randomWorkDelay = 3;
 
 const basePay = 3;
@@ -44,7 +44,7 @@ class User{
     }
 
     #calculateLvl(message, emoji) {
-        let lvl = ~~(((Math.log(this.xp / 2) + 1) / Math.log(2)) / 2.5) + 1;
+        let lvl = ~~(((Math.log(this.xp / 2) + 1) / Math.log(1.5)) / 2) + 1;
         // if (lvl != this.lvl && message) message.react(emoji)
         return lvl;
     }
@@ -90,7 +90,7 @@ class User{
 
     #calculateIncome() {
         this.nextPay = this.lastActivity + workingHours + this.#randomWorkDelay();
-        let pay = basePay + this.lvl - Math.floor(this.currency / 100);
+        let pay = basePay + this.lvl - Math.floor(this.currency / 50);
         let randomVariance = (Math.random() - .5) * payVariance * 2
 
         pay -= Math.floor(randomVariance);
@@ -190,6 +190,18 @@ class mongodb {
 
         alice.currency -= amount; await this.updateUser(alice._id, "currency", alice.currency);
         bob.currency += amount; await this.updateUser(bob._id, "currency", bob.currency);
+    }
+
+    async addBox(_alice, amount = 1) {
+        if (!_alice) throw "NO_TARGET";
+        let alice = await this.findUser(_alice);
+
+        if (isNaN(amount)) throw "NAN";
+        amount = parseInt(amount);
+
+        if (alice.cajas < -amount) throw "NO_BOXES"
+
+        alice.cajas += amount; await this.updateUser(alice._id, "cajas", alice.cajas);
     }
 }
 

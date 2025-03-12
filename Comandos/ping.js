@@ -15,9 +15,9 @@
         let totalTime = Math.abs(messageSentTime - pingMessageTime);
 
         await _message.edit("Pong! " +
-            "\n-# Tiempo en recibir el mensaje: " + (recieveTime).toString() +
-            "\n-# Tiempo en procesar el mensaje: " + (processTime).toString() +
-            "\n-# Tiempo total: " + (totalTime).toString()
+            //"\n-# Tiempo en recibir el mensaje: " + (recieveTime).toString() +
+            //"\n-# Tiempo en procesar el mensaje: " + (processTime).toString() +
+            "\n-# ping: " + (totalTime).toString()
         );
     }
 }

@@ -11,8 +11,8 @@
             resultado += ~~(Math.random() * args[0]);
         }
 
-        const test = new system.EmbedBuilder()
-            .setColor(client.member)
+        const test = new system.embed()
+            .setColor(client.member.displayColor)
             .setTitle("Sacaste...")
             .setDescription("" + resultado)
 
