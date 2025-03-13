@@ -33,7 +33,7 @@
                 { name: "Plata", value: user.currency.toString() + system.currency, inline: true },
                 { name: "XP", value: user.xp.toString(), inline: true },
                 { name: "Lvl", value: user.lvl.toString(), inline: true },
-                { name: "Cajas", value: user.cajas.toString(), inline: true }
+                { name: "Cajas", value: user.cajas.toString() + "📦", inline: true }
             );
         message.channel.send({ embeds: [embed]})
     }

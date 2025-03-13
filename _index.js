@@ -53,7 +53,6 @@ var sistema = {
     commands: undefined,
     prefix: prefix,
     altPrefix: altPrefix,
-    pingTime: 0,
     findOneMember: findOneMember,
 }
 
@@ -100,11 +99,12 @@ client.on('interactionCreate', async interaction => {
 })
 
 client.on('messageCreate', async (_message) => {
-    sistema.pingTime = Date.now();
     message = _message;
     let wasMessageACommand = false;
     let wasPrefixNotUsed = false;
     let messageDate = new Date(message.createdTimestamp);
+
+    if (message.interaction && message.interaction.commandName == "bump" && message.author.id == "302050872383242240") bumpReward(message.interaction.user.id);
 
     if (message.author.bot && message.author.id != "1316479184050192384") return;
 
@@ -152,7 +152,7 @@ client.on('messageCreate', async (_message) => {
 
     //react if mentioned
 
-    if (message.content.toLowerCase().match(ser)) message.react("<:gatowtf:1129239829549420584>");
+    if (message.content.toLowerCase().match(ser)) message.react("<:kyuserio:1317896754422616144>");
     if (message.content.toLowerCase().match(balatro)) message.react("🃏");
 
     //escape if no prefix (may changed it later)
@@ -250,7 +250,7 @@ client.on('messageCreate', async (_message) => {
 
     if (message.mentions.members.first() == client.member.id && !wasMessageACommand && !message.mentions.repliedUser) {
         message.reply(
-            "Holi, para  usar comandos escribe `" +
+            "Para  usar comandos escribe `" +
             altPrefix +
             "` <comando> o `" +
             prefix +
@@ -258,7 +258,7 @@ client.on('messageCreate', async (_message) => {
             altPrefix +
             " p, o , " +
             prefix +
-            "p. Por ejemplo :3"
+            "p. Por ejemplo"
         );
     }
 })
@@ -357,4 +357,12 @@ async function handleUserUpdates(user) {
 //clean a string from having @everyone
 function sanitise(str) {
     return str.replace(everyjuan, "`no`");
+}
+
+async function bumpReward(dbuserid) {
+    await mongoClient.addBox(dbuserid, 2).catch((e) => {
+        return console.log
+    });
+
+    message.react("📦")
 }

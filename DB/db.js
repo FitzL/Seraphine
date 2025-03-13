@@ -192,6 +192,18 @@ class mongodb {
         bob.currency += amount; await this.updateUser(bob._id, "currency", bob.currency);
     }
 
+    async addCurrency(_alice, amount = 1) {
+        if (!_alice) throw "NO_TARGET";
+        let alice = await this.findUser(_alice);
+
+        if (isNaN(amount)) throw "NAN";
+        amount = parseInt(amount);
+
+        if (alice.currency < -amount) throw "BROKE"
+
+        alice.currency += amount; await this.updateUser(alice._id, "currency", alice.currency);
+    }
+
     async addBox(_alice, amount = 1) {
         if (!_alice) throw "NO_TARGET";
         let alice = await this.findUser(_alice);

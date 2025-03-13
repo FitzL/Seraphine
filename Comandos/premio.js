@@ -1,8 +1,8 @@
 ﻿module.exports = {
-    alias: ["premio", "reward", "caja", "darcaja"], //nombre del comando
+    alias: ["premio", "reward", "givebox", "regalar"], //nombre del comando
     descripcion: "", // que hace
-    costo: 50, //cuanto cuesta
-    testing: true, //se está probando?
+    costo: 65, //cuanto cuesta
+    testing: false, //se está probando?
     callback: async (args, message, client, system) => {
         let error = false;
 
