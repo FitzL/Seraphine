@@ -1,4 +1,5 @@
-﻿module.exports = {
+﻿const { Command } = require("../modulos/MCommand.js");
+prototype = {
     alias: ["help"], //nombre del comando
     descripcion: "muestra una descripción rapida de un comando", // que hace
     costo: 0, //cuanto cuesta
@@ -18,8 +19,8 @@
         });
 
         help.forEach(h => {
-            let handle = h[2] + system.currency + " `" + h[0].join("/") + "`\n";
-            if (h[2] == 0 || !h[2]) handle = "(gratis)" + system.currency + " `" + h[0].join("/") + "`\n";
+            let handle = "`" + h[0][0] + "`" + h[2] + system.currency + "\n";
+            if (h[2] == 0 || !h[2]) handle = " `" + h[0][0] + "`" + "(gratis)" + system.currency + "\n";
             availableCommands.push(handle)
         })
 
@@ -39,3 +40,14 @@
         message.reply({ embeds: [box] });
     }
 }
+
+let command = new Command(
+    prototype.alias,
+    prototype.descripcion,
+    prototype.costo,
+    prototype.testing,
+    prototype.callback,
+    prototype.init
+)
+
+module.exports = command;

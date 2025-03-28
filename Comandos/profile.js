@@ -1,4 +1,6 @@
-﻿module.exports = {
+﻿const { Command } = require("../modulos/MCommand.js");
+
+prototype = {
     alias: ["perfil", "p", "profile"], //nombre del comando
     descripcion: "muestra el perfil", // que hace
     costo: 0, //cuanto cuesta
@@ -13,6 +15,17 @@
         if (target) { 
             try  {
                 user = await system.mongoclient.findUser(target.id);
+                user = new system.dbuser(
+                    user._id.toString(),
+                    user.username,
+                    user.xp,
+                    user.lvl,
+                    user.currency,
+                    user.lastActivity,
+                    user.nextXp,
+                    user.nextPay,
+                    user.cajas,
+                );
             }
             catch(e) {
                 console.log(e);
@@ -25,12 +38,14 @@
             discorduser = target;
         }
 
+
         let embed = new system.embed()
             .setColor(discorduser.displayColor)
             .setThumbnail(discorduser.user.displayAvatarURL())
             .setTitle(discorduser.displayName)
             .addFields(
-                { name: "Plata", value: user.currency.toString() + system.currency, inline: true },
+                { name: "Dinero", value: user.currency.toString() + system.currency},
+                { name: "ingreso", value: user.pay().toString() + system.currency, inline: true },
                 { name: "XP", value: user.xp.toString(), inline: true },
                 { name: "Lvl", value: user.lvl.toString(), inline: true },
                 { name: "Cajas", value: user.cajas.toString() + "📦", inline: true }
@@ -38,3 +53,14 @@
         message.channel.send({ embeds: [embed]})
     }
 }
+
+let command = new Command(
+    prototype.alias,
+    prototype.descripcion,
+    prototype.costo,
+    prototype.testing,
+    prototype.callback,
+    prototype.init
+)
+
+module.exports = command;

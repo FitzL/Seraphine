@@ -1,4 +1,5 @@
-﻿module.exports = {
+﻿const { Command } = require("../modulos/MCommand.js"); 
+prototype = {
     alias: ["give", "transfer", "dar"], //nombre del comando
     descripcion: "Transfiere dinero", // que hace
     costo: 0, //cuanto cuesta
@@ -38,6 +39,18 @@
 			.setColor(message.member.displayColor)
 			.setDescription("Has transferido " + ~~amount + "" + system.currency + " a <@" + target._id + ">!");
 
-		return message.channel.send({ embeds: [embed] });
+		message.channel.send({ embeds: [embed] });
+        return;
     }
 }
+
+let command = new Command(
+    prototype.alias,
+    prototype.descripcion,
+    prototype.costo,
+    prototype.testing,
+    prototype.callback,
+    prototype.init
+)
+
+module.exports = command;

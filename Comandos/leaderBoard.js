@@ -1,4 +1,6 @@
-﻿module.exports = {
+﻿const { Command } = require("../modulos/MCommand.js");
+
+prototype = {
     alias: ["lb", "top", "leaderboard"], //nombre del comando
     descripcion: "", // que hace
     costo: 0, //cuanto cuesta
@@ -28,7 +30,7 @@
 
         top.forEach((user, i) => {
             lbEntries.push(
-                `${i + 1}. <@${user._id}>: ${user.currency}${system.currency}  lvl: ${user.lvl}`
+                `${i + 1}. \`${user.currency.toString().padStart(4, " ") }\`${system.currency} lvl: ${user.lvl.toString().padStart(2, " ")} <@${user._id}>`
             );
         });
 
@@ -36,3 +38,14 @@
         message.reply({ embeds: [embed] });
     }
 };
+
+let command = new Command(
+    prototype.alias,
+    prototype.descripcion,
+    prototype.costo,
+    prototype.testing,
+    prototype.callback,
+    prototype.init
+)
+
+module.exports = command;

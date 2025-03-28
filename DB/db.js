@@ -4,11 +4,11 @@ const { ip, port, dbname } = require('./db-settings.json');
 const uri = `mongodb://${ip}:${port}/`;
 
 const xpDelay = 30_000;
-const xpDecay = 2;
+const xpDecay = 2; //doesn't do shit
 const randomXpDelay = 5_500;
 const xpRange = {
-    min: 2,
-    max: 4,
+    min: 1,
+    max: 5,
     bias: 5
 }
 
@@ -16,8 +16,7 @@ const xpRange = {
 const workingHours = 60_000 * 30;
 const randomWorkDelay = 3;
 
-const basePay = 3;
-const payVariance = 2;
+const basePay = 1;
 
 class User{
     _id;
@@ -44,7 +43,7 @@ class User{
     }
 
     #calculateLvl(message, emoji) {
-        let lvl = ~~(((Math.log(this.xp / 2) + 1) / Math.log(1.5)) / 2) + 1;
+        let lvl = ~~(((Math.log(this.xp / 2) + 1) / Math.log(1.5))) + 1;
         // if (lvl != this.lvl && message) message.react(emoji)
         return lvl;
     }
@@ -56,9 +55,9 @@ class User{
     #calculateXp() {
         let gain = ~~((((Math.random() ** xpRange.bias)) * xpRange.max ) + xpRange.min);
 
-        let adjustedGain = (gain - ~~(gain * ((this.xp / 2_000) ** xpDecay)));
+        //let adjustedGain = (gain - ~~(gain * ((this.xp / 10_000) ** xpDecay)));
 
-        this.xp += adjustedGain;
+        this.xp += gain;
     }
 
     #updatenextXp() {
@@ -90,16 +89,17 @@ class User{
 
     #calculateIncome() {
         this.nextPay = this.lastActivity + workingHours + this.#randomWorkDelay();
-        let pay = basePay + this.lvl - Math.floor(this.currency / 50);
-        let randomVariance = (Math.random() - .5) * payVariance * 2
-
-        pay -= Math.floor(randomVariance);
+        let pay = this.pay();
 
         pay = pay < 0 ? 0 : pay;
 
         console.log(this.username, " is getting paid! ", pay);
 
         return pay;
+    }
+
+    pay() {
+        return basePay + Math.floor(this.currency / 200) + Math.floor(this.lvl/10);
     }
 
     async updateCurrency(discordmessage = null, reaction = "🧧") {
@@ -199,7 +199,7 @@ class mongodb {
         if (isNaN(amount)) throw "NAN";
         amount = parseInt(amount);
 
-        if (alice.currency < -amount) throw "BROKE"
+        if (alice.currency < -amount) amount = -alice.currency;
 
         alice.currency += amount; await this.updateUser(alice._id, "currency", alice.currency);
     }

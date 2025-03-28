@@ -3,18 +3,23 @@ var message;
 var system;
 
 const _mini = 50;
-const _normal = 100;
-const _grande = 300;
+const _normal = 75;
+const _grande = 150;
 const robpct = 0.25;
 
-module.exports = {
-    alias: ["abrir", "box", "open", "caja"], //nombre del comando
-    descripcion: "", // que hace
+const { Command } = require("../modulos/MCommand.js");
+
+prototype = {
+    alias: ["abrir", "box", "open", "caja", "ouvrir"], //nombre del comando
+    descripcion: "Abre cajas pues", // que hace
     costo: 0, //cuanto cuesta
-    testing: false, //se está probando?
+    testing: true, //se está probando?
     callback: async (args, _message, client, _system) => {
         system = _system;
-        if (_message.author.dbuser.cajas < 1) return message.reply("No tenés cajas, 'ché")
+        if (_message.author.dbuser.cajas < 1) {
+            message.reply("No tenés cajas, 'ché");
+            return;    
+        }
 
         dbclient = system.mongoclient;
         message = _message;
@@ -35,35 +40,50 @@ module.exports = {
                 break;
             case 'mini':
                 await mini(message.author.dbuser)
-                    .catch((e) => {console.log; return});
+                    .catch((e) => { console.log; return });
                 break;
             case 'mini_troll':
                 await mini_troll(message.author.dbuser)
-                    .catch((e) => {console.log; return});
+                    .catch((e) => { console.log; return });
                 break;
             case 'normal':
                 await normal(message.author.dbuser)
-                    .catch((e) => {console.log; return});
+                    .catch((e) => { console.log; return });
                 break;
             case 'grande':
                 await grande(message.author.dbuser)
-                    .catch((e) => {console.log; return});
+                    .catch((e) => { console.log; return });
                 break;
             case 'rob':
                 await rob(message.author.dbuser)
-                    .catch((e) => {console.log; return});
+                    .catch((e) => { console.log; return });
+                break;
+            case 'pifia':
+                await pifia(message.author.dbuser)
+                    .catch((e) => { console.log; return });
                 break;
         }
+        return;
     }
 }
 
+let command = new Command(
+    prototype.alias,
+    prototype.descripcion,
+    prototype.costo,
+    prototype.testing,
+    prototype.callback,
+    prototype.init
+)
+
 const lt_A = {
-	caja: 15_0,
-    mini: 85_0,
-    mini_troll: 0,
-    normal: 50_0,
-    grande: 10_0,
-    rob: 5,
+    caja: 20_00,
+    pifia: 20_00,
+    mini: 65_00,
+    mini_troll: 10_00,
+    normal: 35_00,
+    grande: 10_00,
+    rob: 15,
 }
 
 let loottable = ProbabilityFromObject(lt_A);
@@ -85,7 +105,7 @@ function ProbabilityFromObject(obj) {
 async function caja(dbuser) {
     await dbclient.addBox(dbuser._id, -1).catch((e) => { console.log; throw "NO_BOXES" });
 
-    let boxes = ~~(Math.random() * 2) + 1;
+    let boxes = ~~(Math.random() * 3) + 1;
     dbclient.addBox(dbuser._id, boxes);
 
     message.reply("Habían " + boxes + "📦 dentro de la caja (?");
@@ -102,12 +122,13 @@ async function mini(dbuser) {
     return message.channel.send({ embeds: [embed] });
 }
 async function mini_troll(dbuser) {
-    await dbclient.addBox(dbuser._id, -1).catch((e) => { console.log; throw "NO_BOXES" });
-    dbclient.addCurrency(dbuser._id, _mini);
+    message.member.timeout(10_000).catch(async (e) => {
+        console.log
+    })
 
     let embed = new system.embed()
         .setColor(message.member.displayColor)
-        .setDescription("<@" + message.author.id + "> recibiste " + _mini + system.currency);
+        .setDescription("<@" + message.author.id + "> chu!");
 
     return message.channel.send({ embeds: [embed] });
 }
@@ -148,3 +169,16 @@ async function rob(dbuser) {
 
     return message.channel.send({ embeds: [embed] });
 }
+
+async function pifia(dbuser) {
+    await dbclient.addBox(dbuser._id, -1).catch((e) => { console.log; throw "NO_BOXES" });
+    dbclient.addCurrency(dbuser._id, ~(normal));
+
+    let embed = new system.embed()
+        .setColor(message.member.displayColor)
+        .setDescription("<@" + message.author.id + "> recibiste " + `-${normal}%` + system.currency `! <:raoralaugh:1343492065954103336>`);
+
+    return message.channel.send({ embeds: [embed] });
+}
+
+module.exports = command;

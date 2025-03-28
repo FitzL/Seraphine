@@ -1,6 +1,6 @@
-﻿exec = require("child_process").execFile;	
+﻿const { Command } = require("../modulos/MCommand.js");
 
-module.exports = {
+prototype = {
 	alias: ["sudo", "eval"],
 	descripcion: "Corre codigo arbitrario",
 	testing: true,
@@ -18,7 +18,18 @@ module.exports = {
 					);
 		} catch (err) {
 			console.log(err);
-			message.reply("Syntax Error.")
+			message.reply("Syntax Error.");
 		};
 	}
 }
+
+let command = new Command(
+	prototype.alias,
+	prototype.descripcion,
+	prototype.costo,
+	prototype.testing,
+	prototype.callback,
+	prototype.init
+)
+
+module.exports = command;

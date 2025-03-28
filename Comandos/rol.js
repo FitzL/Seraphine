@@ -1,6 +1,7 @@
-const { rol } = require('../modulos/Mrol.js');
+﻿const { rol } = require('../modulos/Mrol.js');
+const { Command } = require("../modulos/MCommand.js");
 
-module.exports = {
+prototype = {
     alias: ["rol", "roll", "character"], //nombre del comando
     descripcion: "", // que hace
     costo: 1,
@@ -11,3 +12,14 @@ module.exports = {
         return;
     }
 }
+
+let command = new Command(
+    prototype.alias,
+    prototype.descripcion,
+    prototype.costo,
+    prototype.testing,
+    prototype.callback,
+    prototype.init
+)
+
+module.exports = command;

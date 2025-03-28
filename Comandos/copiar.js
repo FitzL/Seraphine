@@ -1,4 +1,6 @@
-﻿module.exports = {
+﻿const { Command } = require("../modulos/MCommand.js");
+
+prototype = {
     alias: ["imitar", "copy"], //can have multiple but would recommend keeping it under two
     descripcion: "Me hago pasar por alguien más.", //shouldn't exceed two lines.
     costo: 15,
@@ -28,7 +30,18 @@
             avatar: pfp,
         })
         await webhook.send(args.join(" "));
-        webhook.delete();
+        await webhook.delete();
         message.delete();
     }
 }
+
+let command = new Command(
+    prototype.alias,
+    prototype.descripcion,
+    prototype.costo,
+    prototype.testing,
+    prototype.callback,
+    prototype.init
+)
+
+module.exports = command;

@@ -1,4 +1,6 @@
-﻿module.exports = {
+﻿const { Command } = require("../modulos/MCommand.js");
+
+prototype = {
     alias: ["silenciogil", "silencio", "calla"], //nombre del comando
     descripcion: "boop", // que hace
     costo: 30, //cuanto cuesta
@@ -51,3 +53,14 @@
         return;
     }
 }
+
+let command = new Command(
+    prototype.alias,
+    prototype.descripcion,
+    prototype.costo,
+    prototype.testing,
+    prototype.callback,
+    prototype.init
+)
+
+module.exports = command;

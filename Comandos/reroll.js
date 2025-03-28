@@ -1,6 +1,7 @@
+﻿const { Command } = require("../modulos/MCommand.js");
 const { rol } = require('../modulos/Mrol.js');
 
-module.exports = {
+prototype = {
     alias: ["reroll", "rehacer"], //nombre del comando
     descripcion: "", // que hace
     costo: 0,
@@ -9,3 +10,14 @@ module.exports = {
         return sistema.ultimoPersonaje.edit(rol(args[0]))
     }
 }
+
+let command = new Command(
+    prototype.alias,
+    prototype.descripcion,
+    prototype.costo,
+    prototype.testing,
+    prototype.callback,
+    prototype.init
+)
+
+module.exports = command;

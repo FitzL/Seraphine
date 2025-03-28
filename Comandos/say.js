@@ -1,4 +1,6 @@
-﻿module.exports = {
+﻿const { Command } = require("../modulos/MCommand.js");
+
+prototype = {
     alias: ["say"], //nombre del comando
     descripcion: "", // que hace
     costo: 0, //cuanto cuesta
@@ -15,9 +17,20 @@
     }
 }
 
+let command = new Command(
+    prototype.alias,
+    prototype.descripcion,
+    prototype.costo,
+    prototype.testing,
+    prototype.callback,
+    prototype.init
+)
+
 function addEveryone(str) {
     str = str.replace("[everyjuan]", "@everyone");
     str = str.replace("[everyone]", "@everyone");
     str = str.replace("[here]", "@here");
     return str;
 }
+
+module.exports = command;

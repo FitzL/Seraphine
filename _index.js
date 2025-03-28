@@ -1,6 +1,7 @@
 ﻿const fs = require('fs');
 const path = require('path');
 const dir = 'comandos';
+const Comando = require('./modulos/MCommand.js');
 
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const client = new Client({
@@ -73,6 +74,12 @@ client.on('ready', async () => {
         let nombreComando = archivosComandos[archivoComando];  // un archivo x de la lista
         const comando = require(path.join(__dirname, dir, nombreComando)); //require el archivo
         // let { testing } = c;
+
+        if (comando.constructor == Comando.constructor) {
+            console.log(comando.constructor);
+            continue
+        }
+
         comandos.push(comando); //añadir a la lista de comandos
 
         console.log(
@@ -106,7 +113,7 @@ client.on('messageCreate', async (_message) => {
 
     if (message.interaction && message.interaction.commandName == "bump" && message.author.id == "302050872383242240") bumpReward(message.interaction.user.id);
 
-    if (message.author.bot && message.author.id != "1316479184050192384") return;
+    if (message.author.bot) return;
 
     let messageTokens = sanitise(message.content).split(/\s+/);
 
@@ -114,8 +121,15 @@ client.on('messageCreate', async (_message) => {
 
     // find bot member object in server
     client.member = await message.guild.members.fetch(client.user.id);
-    const ser = new RegExp("<@1316479184050192384>|1316479184050192384|" + client.member.nickname.toLowerCase() + "|" + client.user.username.toLowerCase());
-
+    let ser;
+    try {
+         ser = new RegExp("<@1316479184050192384>|1316479184050192384|" + client.member.nickname.toLowerCase() + "|" + client.user.username.toLowerCase());
+    }
+    catch (e) {
+        ser = new RegExp("<@1316479184050192384>|1316479184050192384|" + client.user.username.toLowerCase())
+        console.log
+    }
+    
     // find message author in db
     let dbuser = await mongoClient.findUser(message.author.id).catch((e) => { console.log });
 
@@ -176,67 +190,67 @@ client.on('messageCreate', async (_message) => {
         if (wasPrefixNotUsed) break;
         if (!command) break;
         //the things we care about commands
-        let {
-            alias,
-            descripcion,
-            testing,
-            callback,
-            costo = 0,
-        } = commandOptions;
 
         let cobrar = false;
 
-        for (const _alias of alias) {
+        for (const _alias of commandOptions.alias) {
             //escape loop
             if (command.toLowerCase() != _alias) continue;
             wasMessageACommand = true;
 
             //limit who can mess with wip commands
-            if (testing && (!botadmins.includes(message.author.id))) {
+            if (commandOptions.testing && (!botadmins.includes(message.author.id))) {
                 message.reply("No, jodete.");
                 message.channel.send("<:ayweno:1167952675158110308>");
                 return;
             }
 
             // command cooldown
-            if (((message.createdTimestamp - tiempoDesdeUltimoComando)) < 2_000) {
+            if (((message.createdTimestamp - tiempoDesdeUltimoComando)) < 1_000) {
                 return message.reply("Dame un segundo.").then(m => { setTimeout(() => { m.delete() }, 3_500) });
             }
 
-            try {   
+            try { 
+                // run preparations de command may need
+                messageToken = await commandOptions.init(messageTokens, message, client, sistema).catch(e => {
+                        console.log(e);
+                        return;
+                    }) || messageTokens;
+
                 //manage commands with a price
-                if (costo > 0) cobrar = true;
+                if (commandOptions.costo > 0) cobrar = true;
                 if (isNaN(message.author.dbuser.currency) == true) return message.reply("<@443966554078707723> hiciste algo mal, pendejo. Alguien tiene NaN" + sistema.currency);
-                if (costo > message.author.dbuser.currency && cobrar) {
+                console.log(commandOptions.checkCosto(message.author.dbuser))
+                if (cobrar && !commandOptions.checkCosto(message.author.dbuser)) {
                     message.channel.send("No le hago caso a gente pobre").then(m => {
                         message.channel.send("<:raoralaugh:1343492065954103336>");
                         setTimeout(() => {
-                            message.reply("Pero lo haría por unos " + costo + sistema.currency + " :3");
+                            message.reply("Pero lo haría por unos " + commandOptions.costo + sistema.currency + " :3");
                         }, 3_000);
                     });
 
                     throw "not enough funds";
                 }
 
-
                 // run command callback, may return a reply to the user
-                await callback(messageTokens, message, client, sistema).catch(e => {
-                    console.log(e);
-                    if (e == "PIFIA") return costo = ~~(costo/3);
-                    cobrar = false;
-                    if (e == "RECHAZO") return message.reply(rechazos[~~(Math.random() * rechazos)])
-                }).then(async () => {
-                    // actually take the fee
-                    if (cobrar) {
-                        console.log("-" + costo);
-                        let embed = new EmbedBuilder()
-                            .setColor(client.member.displayColor)
-                            .setDescription("-" + costo + sistema.currency)
+                await commandOptions.callback(messageTokens, message, client, sistema)
+                    .catch(e => {
+                        console.log(e);
+                        cobrar = false;
+                        if (e == "PIFIA") return;
+                        if (e == "RECHAZO") return message.reply(rechazos[~~(Math.random() * rechazos)])
+                    })
+                    .then(async () => {
+                        // actually take the fee
+                        if (cobrar) {
+                            let embed = new EmbedBuilder()
+                                .setColor(client.member.displayColor)
+                                .setDescription("-" + commandOptions.costo + sistema.currency)
 
-                        await mongoClient.transferCurrency(_message.author.id, client.user.id, costo); //taxes
-                        _message.channel.send({embeds: [embed]});
-                    }
-                });
+                            await mongoClient.transferCurrency(_message.author.id, client.user.id, commandOptions.costo); //taxes
+                            _message.channel.send({embeds: [embed]});
+                        }
+                    });
                 //if (reply) message.reply(reply);
             } catch (err) {
                 console.log(err);
@@ -363,6 +377,6 @@ async function bumpReward(dbuserid) {
     await mongoClient.addBox(dbuserid, 2).catch((e) => {
         return console.log
     });
-
-    message.react("📦")
+    await message.react("2️⃣")
+    await message.react("📦")
 }
