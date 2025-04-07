@@ -12,7 +12,7 @@ prototype = {
         if (isNaN(parseInt(amount))) { amount = args[1]; notamount-- };
             if (amount > dbuser.currency) return message.reply("Pobre");
 
-        let target = message.mentions.users.first() || await system.findOneMember(args[notamount]);
+        let target = message.mentions.users.first() || await system.findOneMember(args[notamount], message);
             if (!target) return message.reply("Y a quien se lo mando?");
         target = await system.mongoclient.findUser(target.id);
             

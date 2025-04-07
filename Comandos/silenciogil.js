@@ -9,7 +9,7 @@ prototype = {
         let id = args.shift();
 
         // try to catch the first user mention in message
-        let target = message.mentions.members.first() || await system.findOneMember(id);
+        let target = message.mentions.members.first() || await system.findOneMember(id, message);
         troll = Math.random() < 0.075 ;
 
         if (!target) {

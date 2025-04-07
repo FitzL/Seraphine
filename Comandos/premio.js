@@ -3,19 +3,22 @@
 prototype = {
     alias: ["premio", "reward", "givebox", "regalar", "gift"], //nombre del comando
     descripcion: "", // que hace
-    costo: 55, //cuanto cuesta
-    testing: true, //se está probando?
+    costo: 0, //cuanto cuesta
+    testing: false, //se está probando?
     callback: async (args, message, client, system) => {
-        console.log(this.costo)
+        var costo = 50;
         let error = false;
         notamount = 1;
 
-        let amount = args[0];
+        let amount = args[0] || 1;
         if (isNaN(parseInt(amount))) { amount = args[1]; notamount-- };
-        this.costo *= ~~amount;
-        if (this.costo > message.author.dbuser.currency) return message.reply("Pobre");
+        if (!amount || isNaN(amount)) amount = 1;
+        costo *= ~~amount;
+        console.log(costo);
 
-        let target = message.mentions.users.first() || await system.findOneMember(args[notamount]);
+        if (costo > message.author.dbuser.currency) return message.reply("Pobre");
+
+        let target = message.mentions.users.first() || await system.findOneMember(args[notamount], message);
 
         if (!target) {
             await message.reply("Y a quien se lo mando?");
@@ -28,27 +31,34 @@ prototype = {
         if (target._id == message.author.id) {
             await message.reply("'Che, a vos mism@?\nQue patético.");
             await message.channel.send("<:raoralaugh:1343492065954103336>");
-            throw "PIFIA";
+
+            costo += ~~(costo * 0.5)
         }
 
-        console.log(amount);
+        if (costo > message.author.dbuser.currency) return message.reply("Pobre");
 
-        if (!amount || isNaN(amount)) amount = null;
+        console.log("there is this many boxes: ", amount)
+
+        if (amount == null) {
+            return message.reply("Cuantas cajas querés mandar?")
+        }
 
         await system.mongoclient.addBox(target._id, amount).catch((e) => {
             console.log;
             error = true;
-        }).then(() => {
-            console.log(amount);
-            if (amount != null) {
-                throw "CHECK_PRIZE_AGAIN";
-            }
+        }).then(async () => {
+            let embed = new system.embed()
+                .setColor(client.member.displayColor)
+                .setDescription("-" + costo + system.currency)
+
+            await system.mongoclient.transferCurrency(message.author.id, client.user.id, costo); //taxes
+            message.channel.send({ embeds: [embed] });
         });
 
         if (error) throw "err";
         let embed = new system.embed()
             .setColor(message.member.displayColor)
-            .setDescription("<@" + target._id + "> ha recibido una caja <:peek:1306437352192872559>" + `\n-# por parte de <@` + message.author.id + `>`)
+            .setDescription("<@" + target._id + "> ha recibido " + amount + ` caja${amount > 1 ? "s": ""} <:peek:1306437352192872559>` + `\n-# por parte de <@` + message.author.id + `>`)
 
         message.channel.send({ embeds: [embed] });
         return;

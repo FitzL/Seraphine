@@ -1,28 +1,58 @@
 ﻿const { Command } = require("../modulos/MCommand.js");
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlags } = require('discord.js');
 
 prototype = { //
-    alias: ["choose", "dado"],
-    help: "Lanza una moneda, o un dado",
+    alias: ["choose"],
+    help: "Elige una de varias opciones",
+    testing: false,
     callback: async (args, message, client, system) => {
-        let _default = ["cara", "cruz"];
-        let resultado = 1;
-
-
-
-        if (!args[0] || args[0] <= 2) {
-            resultado = Math.random() > 0.5 ? _default[0] : _default[1];
-        } else if (isNaN(args[0])) {
-            resultado = args[~~(Math.random() * args.length)];
-        } else {
-            resultado += ~~(Math.random() * args[0]);
-        }
+        let options = args.join(" ").split(/,/g).filter(w => w.length > 0);
+        if (options.length < 2) options = args;
+        let resultado = options[~~(Math.random() * options.length)];
 
         const test = new system.embed()
             .setColor(client.member.displayColor)
             .setTitle("Elijo...")
-            .setDescription("" + resultado)
+            .setDescription(resultado)
 
-        message.reply({ embeds: [test] });
+        const denuevo = new ButtonBuilder()
+            .setCustomId('again')
+            .setLabel('Otra vez!')
+            .setStyle(ButtonStyle);
+
+        const buttons = new ActionRowBuilder()
+            .addComponents(denuevo);
+
+        let a = await message.reply({
+            embeds: [test],
+            components: [buttons]
+        });
+
+
+        const collector = a.createMessageComponentCollector({ componentType: ComponentType.Button, time: 30_000 });
+
+        collector.on('collect', i => {
+            if (i.user.id == a.mentions.repliedUser.id) {
+                if (i.customId == "again") {
+                    let resultado = options[~~(Math.random() * options.length)];
+
+                    const test = new system.embed()
+                        .setColor(client.member.displayColor)
+                        .setTitle("Elijo...")
+                        .setDescription(resultado);
+
+                    i.update({
+                        embeds: [test]
+                    })
+                }
+            }
+        });
+
+        collector.on('end', collected => {
+            a.edit({
+                components: []
+            })
+        })
     }
 }
 

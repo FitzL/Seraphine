@@ -3,7 +3,17 @@ const path = require('path');
 const dir = 'comandos';
 const Comando = require('./modulos/MCommand.js');
 
-const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const {
+    Client,
+    GatewayIntentBits,
+    EmbedBuilder,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    ComponentType,
+    MessageFlags
+} = require('discord.js');
+
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -51,7 +61,7 @@ var sistema = {
     getMember: getMember,
     lockdown: false,
     sanitise: sanitise,
-    commands: undefined,
+    commands: [],
     prefix: prefix,
     altPrefix: altPrefix,
     findOneMember: findOneMember,
@@ -72,7 +82,8 @@ client.on('ready', async () => {
 
     for (let archivoComando in archivosComandos) {
         let nombreComando = archivosComandos[archivoComando];  // un archivo x de la lista
-        const comando = require(path.join(__dirname, dir, nombreComando)); //require el archivo
+        if (nombreComando.slice(-3) != ".js") return;
+        const comando = require(path.join(__dirname, dir, nombreComando)) //require el archivo
         // let { testing } = c;
 
         if (comando.constructor == Comando.constructor) {
@@ -81,6 +92,7 @@ client.on('ready', async () => {
         }
 
         comandos.push(comando); //añadir a la lista de comandos
+        sistema.commands.push(comando)
 
         console.log(
             "Cargado: "
@@ -97,16 +109,13 @@ client.on('ready', async () => {
         sistema.currency = sistema.serafin.serverCurrency;
         sistema.lockdown = sistema.serafin.lockdown;
     });
-
-    sistema.commands = comandos;
 })
 
 client.on('interactionCreate', async interaction => {
     if (!interaction.isChatInputCommand()) return;
 })
 
-client.on('messageCreate', async (_message) => {
-    message = _message;
+client.on('messageCreate', async (message) => {
     let wasMessageACommand = false;
     let wasPrefixNotUsed = false;
     let messageDate = new Date(message.createdTimestamp);
@@ -117,7 +126,7 @@ client.on('messageCreate', async (_message) => {
 
     let messageTokens = sanitise(message.content).split(/\s+/);
 
-    console.log(`${message.author.username} @` + messageDate.getHours().toString().padStart(2, "0") + ":" + messageDate.getMinutes().toString().padStart(2, "0"));
+    //console.log(`${message.author.username} @` + messageDate.getHours().toString().padStart(2, "0") + ":" + messageDate.getMinutes().toString().padStart(2, "0"));
 
     // find bot member object in server
     client.member = await message.guild.members.fetch(client.user.id);
@@ -127,7 +136,6 @@ client.on('messageCreate', async (_message) => {
     }
     catch (e) {
         ser = new RegExp("<@1316479184050192384>|1316479184050192384|" + client.user.username.toLowerCase())
-        console.log
     }
     
     // find message author in db
@@ -159,7 +167,7 @@ client.on('messageCreate', async (_message) => {
     if (message.author.id != ownerid && sistema.lockdown) return;
 
     let update;
-    await handleUserUpdates(message.author.dbuser).then(async (_update) => { update = _update });
+    await handleUserUpdates(message.author.dbuser, message).then(async (_update) => { update = _update });
     message.author.dbuser = update.user;
 
     if (message.author.bot) return;
@@ -212,15 +220,19 @@ client.on('messageCreate', async (_message) => {
 
             try { 
                 // run preparations de command may need
-                messageToken = await commandOptions.init(messageTokens, message, client, sistema).catch(e => {
+
+                // defunct, for now
+
+                /*
+                messageTokens = await commandOptions.init(messageTokens, message, client, sistema).catch(e => {
                         console.log(e);
                         return;
                     }) || messageTokens;
+                */
 
                 //manage commands with a price
                 if (commandOptions.costo > 0) cobrar = true;
                 if (isNaN(message.author.dbuser.currency) == true) return message.reply("<@443966554078707723> hiciste algo mal, pendejo. Alguien tiene NaN" + sistema.currency);
-                console.log(commandOptions.checkCosto(message.author.dbuser))
                 if (cobrar && !commandOptions.checkCosto(message.author.dbuser)) {
                     message.channel.send("No le hago caso a gente pobre").then(m => {
                         message.channel.send("<:raoralaugh:1343492065954103336>");
@@ -237,7 +249,10 @@ client.on('messageCreate', async (_message) => {
                     .catch(e => {
                         console.log(e);
                         cobrar = false;
-                        if (e == "PIFIA") return;
+                        if (e == "PIFIA") {
+                            if (message.author.id == "702283061298987089") return message.reply(sereneRechazos[~~(Math.random() * rechazos)])
+                            return message.reply(rechazos[~~(Math.random() * rechazos)])
+                        };
                         if (e == "RECHAZO") return message.reply(rechazos[~~(Math.random() * rechazos)])
                     })
                     .then(async () => {
@@ -247,8 +262,11 @@ client.on('messageCreate', async (_message) => {
                                 .setColor(client.member.displayColor)
                                 .setDescription("-" + commandOptions.costo + sistema.currency)
 
-                            await mongoClient.transferCurrency(_message.author.id, client.user.id, commandOptions.costo); //taxes
-                            _message.channel.send({embeds: [embed]});
+                            await mongoClient.transferCurrency(message.author.id, client.user.id, commandOptions.costo); //taxes
+                            message.reply({
+                                embeds: [embed],
+                                flags: MessageFlags.Ephemeral
+                            });
                         }
                     });
                 //if (reply) message.reply(reply);
@@ -282,7 +300,7 @@ client.login(token);
 // helper functions
 
 // get a member from id
-async function getMember(id) {
+async function getMember(id, message) {
     if (!id) return null;
     let member = message.guild.members.fetch(id).catch((err) => { console.log });
 
@@ -290,7 +308,7 @@ async function getMember(id) {
 }
 
 // get a member from a string
-async function findOneMember(keyword) {
+async function findOneMember(keyword, message) {
     if (!keyword) return null;
     keyword = keyword.toLowerCase();
 
@@ -316,9 +334,7 @@ async function findOneMember(keyword) {
             return;
         }
     })
-    console.log("looking for: ", keyword);
-    console.log("found: ", primerMatch)
-    return await getMember(primerMatch);
+    return await getMember(primerMatch, message);
 }
 
 //get a member from string or id
@@ -334,7 +350,7 @@ async function findOneMember(snowflake) {
 */
 
 // handle mongodb user updates
-async function handleUserUpdates(user) {
+async function handleUserUpdates(user, message) {
     let prevLvl = user.lvl;
 
     await mongoClient.updateUser(user._id, "lastActivity", Date.now());
@@ -373,9 +389,10 @@ function sanitise(str) {
     return str.replace(everyjuan, "`no`");
 }
 
-async function bumpReward(dbuserid) {
+async function bumpReward(dbuserid, message) {
     await mongoClient.addBox(dbuserid, 2).catch((e) => {
-        return console.log
+        console.log
+        return 
     });
     await message.react("2️⃣")
     await message.react("📦")

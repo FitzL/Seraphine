@@ -12,7 +12,7 @@ const {
 } = require('google-translate-api-x');
 
 prototype = {
-    alias: ["tr", "translate", "trad", "traducir"], //nombre del comando
+    alias: ["translate", "tr", "trad", "traducir"], //nombre del comando
     descripcion: "Traduce un mensaje", // que hace
     costo: 1, //cuanto cuesta
     testing: false, //se está probando?

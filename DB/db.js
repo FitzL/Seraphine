@@ -99,7 +99,7 @@ class User{
     }
 
     pay() {
-        return basePay + Math.floor(this.currency / 200) + Math.floor(this.lvl/10);
+        return basePay + Math.floor(Math.min(this.currency, 5_000) / 250) + Math.floor(this.lvl/10);
     }
 
     async updateCurrency(discordmessage = null, reaction = "🧧") {

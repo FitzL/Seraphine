@@ -8,7 +8,7 @@ prototype = {
         let user = message.author.dbuser;
         let discorduser = message.member;
 
-        let target = message.mentions.members.first() || await system.findOneMember(args[0]);
+        let target = message.mentions.members.first() || await system.findOneMember(args[0], message);
 
         console.log(target)
 

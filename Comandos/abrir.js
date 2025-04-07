@@ -11,59 +11,29 @@ const { Command } = require("../modulos/MCommand.js");
 
 prototype = {
     alias: ["abrir", "box", "open", "caja", "ouvrir"], //nombre del comando
-    descripcion: "Abre cajas pues", // que hace
+    descripcion: "Abre una o mas cajas.", // que hace
     costo: 0, //cuanto cuesta
-    testing: true, //se está probando?
+    testing: false, //se está probando?
+    cantidad: 1,
+    init: async (args, _message, client, _system) => {
+    },
     callback: async (args, _message, client, _system) => {
         system = _system;
-        if (_message.author.dbuser.cajas < 1) {
+
+        if (isNaN(_message.author.dbuser.cajas) || _message.author.dbuser.cajas < 1) {
             message.reply("No tenés cajas, 'ché");
-            return;    
+            return;   
         }
 
         dbclient = system.mongoclient;
         message = _message;
 
-        let rndnumber = ~~(Math.random() * 100_000) / 1_000;
-        let prize = "";
-
-        Object.entries(loottable).forEach(([key, value]) => {
-            if (rndnumber >= value[1]) {
-                prize = key;
-            }
-        })
-
-        switch (prize) {
-            case 'caja':
-                await caja(message.author.dbuser)
-                    .catch((e) => { console.log; return});
-                break;
-            case 'mini':
-                await mini(message.author.dbuser)
-                    .catch((e) => { console.log; return });
-                break;
-            case 'mini_troll':
-                await mini_troll(message.author.dbuser)
-                    .catch((e) => { console.log; return });
-                break;
-            case 'normal':
-                await normal(message.author.dbuser)
-                    .catch((e) => { console.log; return });
-                break;
-            case 'grande':
-                await grande(message.author.dbuser)
-                    .catch((e) => { console.log; return });
-                break;
-            case 'rob':
-                await rob(message.author.dbuser)
-                    .catch((e) => { console.log; return });
-                break;
-            case 'pifia':
-                await pifia(message.author.dbuser)
-                    .catch((e) => { console.log; return });
-                break;
+        if (isNaN(args[0]) || args[0] == 1) return singleOpen();
+        else if (_message.author.dbuser.cajas >= args[0]) {
+            return multiOpen(_message.author.dbuser, args[0]);
+        } else {
+            message.reply("No tenés tantas cajas, 'ché");
         }
-        return;
     }
 }
 
@@ -77,16 +47,18 @@ let command = new Command(
 )
 
 const lt_A = {
-    caja: 20_00,
-    pifia: 20_00,
+    caja: 23_00,
+    pifia: 15_00,
     mini: 65_00,
     mini_troll: 10_00,
     normal: 35_00,
     grande: 10_00,
-    rob: 15,
+    rob: 14,
 }
 
 let loottable = ProbabilityFromObject(lt_A);
+
+// turn loottable into probabilities
 function ProbabilityFromObject(obj) {
     let total = Object.values(obj).reduce((x, tally) => x + tally);
     let tally = 0;
@@ -102,15 +74,130 @@ function ProbabilityFromObject(obj) {
     return obj;
 }
 
+//Manage a single box opening
+async function singleOpen() {
+    let rndnumber = ~~(Math.random() * 100_000) / 1_000;
+    let prize = "";
+
+    Object.entries(loottable).forEach(([key, value]) => {
+        if (rndnumber >= value[1]) {
+            prize = key;
+        }
+    })
+
+    switch (prize) {
+        case 'caja':
+            await caja(message.author.dbuser)
+                .catch((e) => { console.log; return });
+            break;
+        case 'mini':
+            await mini(message.author.dbuser)
+                .catch((e) => { console.log; return });
+            break;
+        case 'mini_troll':
+            await mini_troll(message.author.dbuser)
+                .catch((e) => { console.log; return });
+            break;
+        case 'normal':
+            await normal(message.author.dbuser)
+                .catch((e) => { console.log; return });
+            break;
+        case 'grande':
+            await grande(message.author.dbuser)
+                .catch((e) => { console.log; return });
+            break;
+        case 'rob':
+            await rob(message.author.dbuser)
+                .catch((e) => { console.log; return });
+            break;
+        case 'pifia':
+            await pifia(message.author.dbuser)
+                .catch((e) => { console.log; return });
+            break;
+    }
+    return;
+
+}
+
+// Opens multiple boxes
+async function multiOpen(dbuser, amount) {
+    await dbclient.addBox(dbuser._id, -amount).catch((e) => { console.log; throw "NO_BOXES" });
+    let totalCurrency = 0;
+    let totalBoxes = 0;
+    var serafin = await dbclient.findUser("1316479184050192384").catch((e) => { console.log });
+    var lotoMoney = ~~(serafin.currency * robpct);
+    var loto = false;
+
+    while (amount--) {
+        let rndnumber = ~~(Math.random() * 100_000) / 1_000;
+        let prize = "";
+
+        Object.entries(loottable).forEach(([key, value]) => {
+            if (rndnumber >= value[1]) {
+                prize = key;
+            }
+        });
+
+        switch (prize) {
+            case 'caja':
+                totalBoxes += ~~(Math.random() * 3) + 1;
+                break;
+            case 'mini':
+                totalCurrency += _mini;
+                break;
+            case 'mini_troll':
+                totalCurrency += _mini;
+                break;
+            case 'normal':
+                totalCurrency += _normal;
+                break;
+            case 'grande':
+                totalCurrency += _grande;
+                break;
+            case 'rob':
+                console.log(loto);
+                if (loto) {
+                    totalBoxes += 2;
+                    break;
+                }
+
+                loto = true;
+                totalCurrency += lotoMoney;
+                dbclient.addCurrency(serafin._id, -lotoMoney);
+                break;
+            case 'pifia':
+                totalCurrency -= _mini;
+                break;
+        }
+    };
+    console.log(totalCurrency, totalBoxes)
+    let embed = new system.embed()
+        .setColor(message.member.displayColor)
+        .setDescription("Habían " + totalCurrency + system.currency + " y " + totalBoxes + "📦" + " dentro.");
+
+    if (totalBoxes == 0) embed.setDescription("Habían " + totalCurrency + system.currency + " dentro.");
+
+    if (loto == true) embed.setDescription("Habían " + totalCurrency + system.currency + " y " + totalBoxes + "📦" + " dentro. Y ganaste la lotería.");;
+
+    dbclient.addBox(dbuser._id, totalBoxes);
+    dbclient.addCurrency(dbuser._id, totalCurrency);
+
+    return message.channel.send({ embeds: [embed] });
+}
+
+
+// Methods for single Box opening
 async function caja(dbuser) {
     await dbclient.addBox(dbuser._id, -1).catch((e) => { console.log; throw "NO_BOXES" });
 
     let boxes = ~~(Math.random() * 3) + 1;
     dbclient.addBox(dbuser._id, boxes);
-
-    message.reply("Habían " + boxes + "📦 dentro de la caja (?");
-    return;
+    let embed = new system.embed()
+        .setColor(message.member.displayColor)
+        .setDescription("Habían " + boxes + "📦 dentro de la caja (?");
+    return message.channel.send({ embeds: [embed] });
 }
+
 async function mini(dbuser) {
     await dbclient.addBox(dbuser._id, -1).catch((e) => { console.log; throw "NO_BOXES" });
     dbclient.addCurrency(dbuser._id, _mini);
@@ -172,12 +259,14 @@ async function rob(dbuser) {
 
 async function pifia(dbuser) {
     await dbclient.addBox(dbuser._id, -1).catch((e) => { console.log; throw "NO_BOXES" });
-    dbclient.addCurrency(dbuser._id, ~(normal));
+    await dbclient.addCurrency(dbuser._id, ~(_mini));
+    console.log("it went through")
 
     let embed = new system.embed()
         .setColor(message.member.displayColor)
-        .setDescription("<@" + message.author.id + "> recibiste " + `-${normal}%` + system.currency `! <:raoralaugh:1343492065954103336>`);
+        .setDescription("<@" + message.author.id + "> recibiste " + `-${_mini}` + system.currency + `! <:raoralaugh:1343492065954103336>`);
 
+    console.log(embed, 'embed');
     return message.channel.send({ embeds: [embed] });
 }
 

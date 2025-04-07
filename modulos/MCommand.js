@@ -7,12 +7,13 @@
     callback = async () => { };
     cantidad = 1;
 
-    constructor(_alias = [], _descripcion = "", _costo = 0, _testing = false, _callback = async () => { }, _init = async () => { }) {
+    constructor(_alias = [], _descripcion = "", _costo = 0, _testing = false, _callback = async () => { }, _init = async () => { }, _cantidad = 1) {
         this.alias = _alias;
         this.descripcion = _descripcion;
         this.costo = _costo;
         this.testing = _testing;
         this.callback = _callback;
+        this.cantidad = 1;
     }
 
     calculateCosto(multiplier = this.cantidad, bypass = false) {
@@ -23,6 +24,14 @@
 
     checkCosto(user, multiplier = this.cantidad, bypass) {
         return user.currency > this.calculateCosto(multiplier);
+    }
+
+    getCantidad() {
+        return this.cantidad;
+    }
+
+    updateCantidad(num) {
+        this.cantidad = num;
     }
 }
 
