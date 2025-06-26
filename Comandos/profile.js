@@ -2,7 +2,7 @@
 
 prototype = {
     alias: ["perfil", "p", "profile"], //nombre del comando
-    descripcion: "muestra el perfil", // que hace
+    descripcion: "Muestra el perfil", // que hace
     costo: 0, //cuanto cuesta
     callback: async (args, message, client, system) => {
         let user = message.author.dbuser;

@@ -32,9 +32,25 @@ prototype = {
                 diceResults.push((1 + ~~(Math.random() * die)));
             }
 
+            
+
             results.push(
                 diceAmount + "d" + dieFace  +
-                "```" + (diceResults.sort((a, b) => { return a - b })).join(", ") + "```"
+                "```" +
+                (diceResults/*.sort((a, b) => { return a - b })*/).join(", ") + // I don't want them in order now :3
+                "```" +
+                "Total: " +
+                "```" +
+                (diceResults.reduce((curr, tot) => curr + tot))
+                + "```" +
+                "Min: " +
+                "```" +
+                (Math.min(...diceResults))
+                + "```" +
+                "Max: " +
+                "```" +
+                (Math.max(...diceResults))
+                + "```" 
             );
         }
 

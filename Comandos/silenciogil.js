@@ -1,7 +1,7 @@
 ﻿const { Command } = require("../modulos/MCommand.js");
 
 prototype = {
-    alias: ["silenciogil", "silencio", "calla"], //nombre del comando
+    alias: ["silenciogil", "silencio", "calla", "mute"], //nombre del comando
     descripcion: "boop", // que hace
     costo: 30, //cuanto cuesta
     testing: false, //se está probando?
@@ -31,25 +31,25 @@ prototype = {
             target = message.member;
             await target.timeout(15_000, 'kyc').catch(async (err) => {
                 await message.channel.send("no?");
-                message.delete();
+                //message.delete();
                 throw err;
             })
 
-            await message.channel.send("<:raoralaugh:1343492065954103336> <@" + target.id + ">");
+            await message.channel.send("<@" + target.id + "> usó silencio gil, pero fue poco efectivo...");
 
-            message.delete();
+            //message.delete();
             return;
         }
 
         await target.timeout(30_000, 'kyc').catch(async (err) => {
             await message.channel.send("No lo puedo silenciar al hdp");
-            message.delete();
+            //message.delete();
             throw err;
         })
 
         await message.channel.send("silencio gil <@" + target.id + ">");
 
-        message.delete();
+        //message.delete();
         return;
     }
 }

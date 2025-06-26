@@ -11,7 +11,7 @@ prototype = {
 
         if (!target) {
             message.reply("Ni idea de quien hablas.");
-            throw "user not found";
+            throw "USER_NOT_FOUND";
         };
 
         await message.channel.send("_boop_ <@" + target.id + ">");

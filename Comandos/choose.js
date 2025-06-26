@@ -18,7 +18,7 @@ prototype = { //
         const denuevo = new ButtonBuilder()
             .setCustomId('again')
             .setLabel('Otra vez!')
-            .setStyle(ButtonStyle);
+            .setStyle(1);
 
         const buttons = new ActionRowBuilder()
             .addComponents(denuevo);

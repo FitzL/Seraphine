@@ -1,13 +1,15 @@
 ﻿var dbclient;
 var message;
 var system;
+var serafin;
 
-const _mini = 50;
+const _mini = 60;
 const _normal = 75;
 const _grande = 150;
-const robpct = 0.25;
+const robpct = 0.15;
 
 const { Command } = require("../modulos/MCommand.js");
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlags } = require('discord.js');
 
 prototype = {
     alias: ["abrir", "box", "open", "caja", "ouvrir"], //nombre del comando
@@ -18,15 +20,21 @@ prototype = {
     init: async (args, _message, client, _system) => {
     },
     callback: async (args, _message, client, _system) => {
-        system = _system;
-
-        if (isNaN(_message.author.dbuser.cajas) || _message.author.dbuser.cajas < 1) {
-            message.reply("No tenés cajas, 'ché");
-            return;   
-        }
-
+        system = _system
         dbclient = system.mongoclient;
         message = _message;
+        serafin = await dbclient.findUser("1316479184050192384").catch((e) => { console.log });
+
+        if (message.channel.id == "1126988705513619516") return message.reply(
+            { content: `Por favor ve a otro canal`, flags: MessageFlags.Ephemeral }
+        )
+
+        if (isNaN(_message.author.dbuser.cajas) || _message.author.dbuser.cajas < 1) {
+            _message.reply("No tenés cajas, 'ché");
+            return;
+        }
+
+        if (args[0] === "all") args[0] = _message.author.dbuser.cajas;
 
         if (isNaN(args[0]) || args[0] == 1) return singleOpen();
         else if (_message.author.dbuser.cajas >= args[0]) {
@@ -47,13 +55,13 @@ let command = new Command(
 )
 
 const lt_A = {
-    caja: 23_00,
-    pifia: 15_00,
-    mini: 65_00,
+    caja: 11_00,
+    pifia: 10_00,
+    mini: 30_00,
     mini_troll: 10_00,
-    normal: 35_00,
+    normal: 25_00,
     grande: 10_00,
-    rob: 14,
+    rob: 2,
 }
 
 let loottable = ProbabilityFromObject(lt_A);
@@ -84,6 +92,8 @@ async function singleOpen() {
             prize = key;
         }
     })
+
+    console.log(prize);
 
     switch (prize) {
         case 'caja':
@@ -124,7 +134,6 @@ async function multiOpen(dbuser, amount) {
     await dbclient.addBox(dbuser._id, -amount).catch((e) => { console.log; throw "NO_BOXES" });
     let totalCurrency = 0;
     let totalBoxes = 0;
-    var serafin = await dbclient.findUser("1316479184050192384").catch((e) => { console.log });
     var lotoMoney = ~~(serafin.currency * robpct);
     var loto = false;
 
@@ -163,7 +172,6 @@ async function multiOpen(dbuser, amount) {
 
                 loto = true;
                 totalCurrency += lotoMoney;
-                dbclient.addCurrency(serafin._id, -lotoMoney);
                 break;
             case 'pifia':
                 totalCurrency -= _mini;
@@ -180,7 +188,7 @@ async function multiOpen(dbuser, amount) {
     if (loto == true) embed.setDescription("Habían " + totalCurrency + system.currency + " y " + totalBoxes + "📦" + " dentro. Y ganaste la lotería.");;
 
     dbclient.addBox(dbuser._id, totalBoxes);
-    dbclient.addCurrency(dbuser._id, totalCurrency);
+    dbclient.transferCurrency(serafin._id, dbuser._id, totalCurrency);
 
     return message.channel.send({ embeds: [embed] });
 }
@@ -200,7 +208,7 @@ async function caja(dbuser) {
 
 async function mini(dbuser) {
     await dbclient.addBox(dbuser._id, -1).catch((e) => { console.log; throw "NO_BOXES" });
-    dbclient.addCurrency(dbuser._id, _mini);
+    dbclient.transferCurrency(serafin._id, dbuser._id, _mini);
 
     let embed = new system.embed()
         .setColor(message.member.displayColor)
@@ -221,7 +229,7 @@ async function mini_troll(dbuser) {
 }
 async function normal(dbuser) {
     await dbclient.addBox(dbuser._id, -1).catch((e) => { console.log; throw "NO_BOXES" });
-    dbclient.addCurrency(dbuser._id, _normal);
+    dbclient.transferCurrency(serafin._id, dbuser._id, _normal);
 
     let embed = new system.embed()
         .setColor(message.member.displayColor)
@@ -231,7 +239,7 @@ async function normal(dbuser) {
 }
 async function grande(dbuser) {
     await dbclient.addBox(dbuser._id, -1).catch((e) => { console.log; throw "NO_BOXES" });
-    dbclient.addCurrency(dbuser._id, _grande);
+    dbclient.transferCurrency(serafin._id, dbuser._id, _grande);
 
     let embed = new system.embed()
         .setColor(message.member.displayColor)
@@ -259,7 +267,7 @@ async function rob(dbuser) {
 
 async function pifia(dbuser) {
     await dbclient.addBox(dbuser._id, -1).catch((e) => { console.log; throw "NO_BOXES" });
-    await dbclient.addCurrency(dbuser._id, ~(_mini));
+    await dbclient.transferCurrency(dbuser._id, serafin._id, _mini);
     console.log("it went through")
 
     let embed = new system.embed()

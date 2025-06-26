@@ -35,17 +35,11 @@ class User{
 
         this.xp = _xp;
         this.currency = _currency;
-        this.lvl = this.#calculateLvl();
         this.lastActivity = _lastActivity;
+        this.lvl = this.#calculateLvl();
         this.nextXp = _nextXp;
         this.nextPay = _nextPay;
         this.cajas = _cajas;
-    }
-
-    #calculateLvl(message, emoji) {
-        let lvl = ~~(((Math.log(this.xp / 2) + 1) / Math.log(1.5))) + 1;
-        // if (lvl != this.lvl && message) message.react(emoji)
-        return lvl;
     }
 
     #checkXpTimer() {
@@ -60,12 +54,20 @@ class User{
         this.xp += gain;
     }
 
+    #calculateLvl(message, emoji) {
+        if (this.lastActivity == -1) return 99;
+        let lvl = ~~(((Math.log(this.xp / 2) + 1) / Math.log(1.5))) + 1;
+        // if (lvl != this.lvl && message) message.react(emoji)
+        return lvl;
+    }
+
     #updatenextXp() {
         this.nextXp = ( Date.now() + xpDelay + ~~((Math.random() * 2 - 1) * randomXpDelay));
         return;
     }
 
     updateXp() {
+        if (this.lastActivity == -1) return 999;
         if(!this.#checkXpTimer()) return this.xp;
 
         this.#calculateXp();
@@ -74,6 +76,7 @@ class User{
     }
 
     updateLvl(message = null, emoji = null) {
+        if (this.lastActivity == -1) return 99;
         this.#calculateLvl(message, emoji);
         return this.lvl;
     }
@@ -88,6 +91,7 @@ class User{
     }
 
     #calculateIncome() {
+        if (this.lastActivity == -1) return 999;
         this.nextPay = this.lastActivity + workingHours + this.#randomWorkDelay();
         let pay = this.pay();
 
@@ -99,10 +103,12 @@ class User{
     }
 
     pay() {
+        if (this.lastActivity == -1) return 999;
         return basePay + Math.floor(Math.min(this.currency, 5_000) / 250) + Math.floor(this.lvl/10);
     }
 
     async updateCurrency(discordmessage = null, reaction = "🧧") {
+        if (this.lastActivity == -1) return this.currency;
         if (!this.#checkPayTime()) {
             return this.currency;
         }
@@ -151,18 +157,18 @@ class mongodb {
 
     async findUser(userid) {
         let user = await this.users.findOne({ _id: userid });
-        if (!user) throw "user not found";
+        if (!user) throw "USER_NOT_FOUND";
         return user;
     }
 
     async insertUser (user) {
         if (!user || user == null) return;
-        if (await this.findUser(user._id).catch(() => { console.log })) throw "user already exists";
+        if (await this.findUser(user._id).catch(() => { console.log })) throw "USER_ALREADY_EXISTS";
         await this.users.insertOne(user);
     }
 
     async updateUser (id, field, content) {
-        if (!field || !id) throw "missing field or id";
+        if (!field || !id) throw "MISSING_FIELD_OR_ID";
 
         await this.users.updateOne({_id: id}, {$set: {[field]: content}})
     }

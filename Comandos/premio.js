@@ -1,12 +1,12 @@
 ﻿const { Command } = require("../modulos/MCommand.js");
 
 prototype = {
-    alias: ["premio", "reward", "givebox", "regalar", "gift"], //nombre del comando
+    alias: ["premio", "reward", "givebox", "regalar", "gift", "buy"], //nombre del comando
     descripcion: "", // que hace
     costo: 0, //cuanto cuesta
     testing: false, //se está probando?
     callback: async (args, message, client, system) => {
-        var costo = 50;
+        var costo = 55;
         let error = false;
         notamount = 1;
 
@@ -20,6 +20,8 @@ prototype = {
 
         let target = message.mentions.users.first() || await system.findOneMember(args[notamount], message);
 
+        target = !target ? message.member : target;
+
         if (!target) {
             await message.reply("Y a quien se lo mando?");
             throw "err";
@@ -27,12 +29,10 @@ prototype = {
 
         target = await system.mongoclient.findUser(target.id).catch((e) => console.log);
 
-
         if (target._id == message.author.id) {
-            await message.reply("'Che, a vos mism@?\nQue patético.");
             await message.channel.send("<:raoralaugh:1343492065954103336>");
 
-            costo += ~~(costo * 0.5)
+            costo += ~~(costo * .19)
         }
 
         if (costo > message.author.dbuser.currency) return message.reply("Pobre");

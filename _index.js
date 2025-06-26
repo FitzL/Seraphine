@@ -2,6 +2,7 @@
 const path = require('path');
 const dir = 'comandos';
 const Comando = require('./modulos/MCommand.js');
+const chatterBox = require('./modulos/MChatterbox.js')
 
 const {
     Client,
@@ -19,7 +20,8 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildMembers
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.DirectMessageTyping
     ]
 });
 
@@ -67,7 +69,7 @@ var sistema = {
     findOneMember: findOneMember,
 }
 
-const everyjuan = new RegExp("@everyone" + "|@here");
+const everyjuan = new RegExp("@everyone" + "|@here" + "|<@&..+>", "gi");
 const balatro = new RegExp("balatro|poker|jimbo");
 
 // const { REST, Routes} = require('discord.js');
@@ -118,13 +120,22 @@ client.on('interactionCreate', async interaction => {
 client.on('messageCreate', async (message) => {
     let wasMessageACommand = false;
     let wasPrefixNotUsed = false;
-    let messageDate = new Date(message.createdTimestamp);
 
     if (message.interaction && message.interaction.commandName == "bump" && message.author.id == "302050872383242240") bumpReward(message.interaction.user.id);
 
     if (message.author.bot) return;
 
     let messageTokens = sanitise(message.content).split(/\s+/);
+
+    if (message.channel.id == "1126988705513619516" && messageTokens.length > 2 && messageTokens[0].toLowerCase() == "neko" && messageTokens[1].toLowerCase() == "ask") {
+        console.log("ask");
+        message.member.timeout(180_000, "neko ask en general").catch(
+            (err) => {
+                return message.reply("No te puedo mutear, pero deja de joder")
+            }
+        );
+        message.reply("Chuu!")
+    }
 
     //console.log(`${message.author.username} @` + messageDate.getHours().toString().padStart(2, "0") + ":" + messageDate.getMinutes().toString().padStart(2, "0"));
 
@@ -167,7 +178,8 @@ client.on('messageCreate', async (message) => {
     if (message.author.id != ownerid && sistema.lockdown) return;
 
     let update;
-    await handleUserUpdates(message.author.dbuser, message).then(async (_update) => { update = _update });
+    if (message.author.id == "469661223764361216") await handleKyuUpdates(message.author.dbuser, message).then(async (_update) => { update = _update });
+    else await handleUserUpdates(message.author.dbuser, message).then(async (_update) => { update = _update });
     message.author.dbuser = update.user;
 
     if (message.author.bot) return;
@@ -214,7 +226,7 @@ client.on('messageCreate', async (message) => {
             }
 
             // command cooldown
-            if (((message.createdTimestamp - tiempoDesdeUltimoComando)) < 1_000) {
+            if (((message.createdTimestamp - tiempoDesdeUltimoComando)) < 1_500) {
                 return message.reply("Dame un segundo.").then(m => { setTimeout(() => { m.delete() }, 3_500) });
             }
 
@@ -232,7 +244,7 @@ client.on('messageCreate', async (message) => {
 
                 //manage commands with a price
                 if (commandOptions.costo > 0) cobrar = true;
-                if (isNaN(message.author.dbuser.currency) == true) return message.reply("<@443966554078707723> hiciste algo mal, pendejo. Alguien tiene NaN" + sistema.currency);
+                //if (isNaN(message.author.dbuser.currency) == true) return message.reply("<@443966554078707723> hiciste algo mal, pendejo. Alguien tiene NaN" + sistema.currency);
                 if (cobrar && !commandOptions.checkCosto(message.author.dbuser)) {
                     message.channel.send("No le hago caso a gente pobre").then(m => {
                         message.channel.send("<:raoralaugh:1343492065954103336>");
@@ -241,7 +253,7 @@ client.on('messageCreate', async (message) => {
                         }, 3_000);
                     });
 
-                    throw "not enough funds";
+                    throw "NOT_ENOUGH_FUNDS";
                 }
 
                 // run command callback, may return a reply to the user
@@ -249,11 +261,24 @@ client.on('messageCreate', async (message) => {
                     .catch(e => {
                         console.log(e);
                         cobrar = false;
-                        if (e == "PIFIA") {
-                            if (message.author.id == "702283061298987089") return message.reply(sereneRechazos[~~(Math.random() * rechazos)])
-                            return message.reply(rechazos[~~(Math.random() * rechazos)])
-                        };
-                        if (e == "RECHAZO") return message.reply(rechazos[~~(Math.random() * rechazos)])
+
+                        switch (e) {
+                            case "PIFIA":
+                                if (message.author.id == "702283061298987089") return message.reply(sereneRechazos[~~(Math.random() * rechazos)])
+                                message.reply(rechazos[~~(Math.random() * rechazos)])
+                                break;
+                            case "RECHAZO":
+                                message.reply(rechazos[~~(Math.random() * rechazos)])
+                                break;
+                            case "USER_NOT_FOUND":
+                                console.log(e);
+                                break;
+                            default:
+                                message.channel.send({
+                                    content: "Hubo un error! Por favor reportalo con `sera report <problema>`",
+                                    flags: MessageFlags.Ephimeral
+                                })
+                        }
                     })
                     .then(async () => {
                         // actually take the fee
@@ -263,9 +288,8 @@ client.on('messageCreate', async (message) => {
                                 .setDescription("-" + commandOptions.costo + sistema.currency)
 
                             await mongoClient.transferCurrency(message.author.id, client.user.id, commandOptions.costo); //taxes
-                            message.reply({
-                                embeds: [embed],
-                                flags: MessageFlags.Ephemeral
+                            message.channel.send({
+                                embeds: [embed]
                             });
                         }
                     });
@@ -384,16 +408,51 @@ async function handleUserUpdates(user, message) {
     };
 }
 
-//clean a string from having @everyone
-function sanitise(str) {
-    return str.replace(everyjuan, "`no`");
+async function handleKyuUpdates(user, message) {
+    let prevLvl = user.lvl;
+
+    await mongoClient.updateUser(user._id, "lastActivity", -1);
+
+    await mongoClient.updateUser(user._id, "xp", 999);
+    await mongoClient.updateUser(user._id, "lvl", user.updateLvl(message, "🆙"));
+    await mongoClient.updateUser(user._id, "currency", 999);
+    await mongoClient.updateUser(user._id, "cajas", 999);
+
+    await mongoClient.updateUser(user._id, "nextXp", user.nextXp);
+    await mongoClient.updateUser(user._id, "nextPay", user.nextPay);
+
+    let updateduser = await mongoClient.findUser(user._id).catch((e) => { console.log });
+
+    updateduser = await new dbUser(
+        updateduser._id,
+        updateduser.username,
+        updateduser.xp,
+        updateduser.lvl,
+        updateduser.currency,
+        updateduser.lastActivity,
+        updateduser.nextXp,
+        updateduser.nextPay,
+        updateduser.cajas,
+    );
+    
+    let lvlup = updateduser.lvl > prevLvl;
+
+    return {
+        user: updateduser,
+        lvlup: lvlup
+    };
 }
 
-async function bumpReward(dbuserid, message) {
+//clean a string from having @everyone
+function sanitise(str) {
+    return str.replaceAll(everyjuan, "`no`");
+}
+
+async function bumpReward(dbuserid, _message) {
     await mongoClient.addBox(dbuserid, 2).catch((e) => {
         console.log
-        return 
     });
-    await message.react("2️⃣")
-    await message.react("📦")
+    await _message.react("2️⃣")
+    await _message.react("📦")
+    return;
 }
