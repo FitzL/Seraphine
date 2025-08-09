@@ -32,6 +32,7 @@ prototype = {
         if (target._id == message.author.id) {
             await message.channel.send("<:raoralaugh:1343492065954103336>");
 
+
             costo += ~~(costo * .19)
         }
 
@@ -60,7 +61,24 @@ prototype = {
             .setColor(message.member.displayColor)
             .setDescription("<@" + target._id + "> ha recibido " + amount + ` caja${amount > 1 ? "s": ""} <:peek:1306437352192872559>` + `\n-# por parte de <@` + message.author.id + `>`)
 
-        message.channel.send({ embeds: [embed] });
+      message.channel.send({ embeds: [embed] });
+
+      await message.guild.channels.fetch("1359188893252981032")
+        .then((log) => {
+          let logEmbed = new system.embed()
+            .setColor(client.member.displayColor)
+            .setDescription(
+              costo + system.currency +
+              `\n<@${message.author.id}> usó \`buy\``
+            )
+
+          log.send(
+            {
+              embeds: [logEmbed]
+            }
+          )
+        })
+
         return;
     }
 }

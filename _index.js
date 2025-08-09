@@ -121,7 +121,7 @@ client.on('messageCreate', async (message) => {
     let wasMessageACommand = false;
     let wasPrefixNotUsed = false;
 
-    if (message.interaction && message.interaction.commandName == "bump" && message.author.id == "302050872383242240") bumpReward(message.interaction.user.id);
+    if (message.interaction && message.interaction.commandName == "bump" && message.author.id == "302050872383242240") bumpReward(message.interaction.user.id, message);
 
     if (message.author.bot) return;
 
@@ -177,10 +177,10 @@ client.on('messageCreate', async (message) => {
      
     if (message.author.id != ownerid && sistema.lockdown) return;
 
-    let update;
-    if (message.author.id == "469661223764361216") await handleKyuUpdates(message.author.dbuser, message).then(async (_update) => { update = _update });
-    else await handleUserUpdates(message.author.dbuser, message).then(async (_update) => { update = _update });
-    message.author.dbuser = update.user;
+    //let update;
+    //if (message.author.id == "469661223764361216") await handleKyuUpdates(message.author.dbuser, message).then(async (_update) => { update = _update });
+    //else await handleUserUpdates(message.author.dbuser, message).then(async (_update) => { update = _update });
+    //message.author.dbuser = update.user;
 
     if (message.author.bot) return;
 
@@ -291,6 +291,22 @@ client.on('messageCreate', async (message) => {
                             message.channel.send({
                                 embeds: [embed]
                             });
+
+                          await message.guild.channels.fetch("1359188893252981032")
+                            .then((log) => {
+                              let logEmbed = new EmbedBuilder()
+                                .setColor(client.member.displayColor)
+                                .setDescription(
+                                  commandOptions.costo + sistema.currency +
+                                  `\n<@${message.author.id}> usó \`${_alias}\``
+                                )
+
+                              log.send(
+                                {
+                                  embeds: [logEmbed]
+                                }
+                              )
+                            })
                         }
                     });
                 //if (reply) message.reply(reply);

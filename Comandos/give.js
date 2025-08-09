@@ -5,7 +5,7 @@ prototype = {
     costo: 0, //cuanto cuesta
     callback: async (args, message, client, system) => {
         let dbuser = message.author.dbuser;
-        let error = false
+        let exit = false
         notamount = 1;
 
         let amount = args[0];
@@ -18,7 +18,7 @@ prototype = {
             
         await system.mongoclient.transferCurrency(dbuser._id, target._id, amount).catch((e) => {
             console.log;
-            error = true;
+            exit = true;
             switch (e) {
                 case "A_AND_B_ARE_EQUAL":
                     return message.reply("'tas pendejo?");
@@ -34,7 +34,7 @@ prototype = {
             }
         });
 
-        if (error) throw "err";
+        if (exit) return;
 		let embed = new system.embed()
 			.setColor(message.member.displayColor)
 			.setDescription("Has transferido " + ~~amount + "" + system.currency + " a <@" + target._id + ">!");
