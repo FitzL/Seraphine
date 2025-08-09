@@ -35,6 +35,8 @@ prototype = {
     }
 }
 
+//seasdf
+
 let command = new Command(
     prototype.alias,
     prototype.descripcion,
