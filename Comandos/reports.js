@@ -6,7 +6,7 @@ prototype = {
     costo: 0, //cuanto cuesta
     testing: false, //se está probando?
     callback: async (args, message, client, system) => {
-        let blacklist = []
+        let blacklist = ["567493815481663508"]
 
         if (blacklist.includes(message.author.id)) return message.reply("No voy a recibir reportes de tu parte.")
         if (!args[0]) return message.reply("Como vas a mandar un reporte vacio, gil")

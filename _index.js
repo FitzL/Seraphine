@@ -50,7 +50,7 @@ let sereneRechazos = [
 
 var message;
 const prefix = "s.";
-const altPrefix = "sera";
+const altPrefix = "miku";
 
 var sistema = {
     ultimoPersonaje: ultimoPersonaje,
@@ -186,7 +186,7 @@ client.on('messageCreate', async (message) => {
 
     //react if mentioned
 
-    if (message.content.toLowerCase().match(ser)) message.react("<:kyuserio:1317896754422616144>");
+    //if (message.content.toLowerCase().match(ser)) message.react("<:kyuserio:1317896754422616144>");
     if (message.content.toLowerCase().match(balatro)) message.react("🃏");
 
     //escape if no prefix (may changed it later)
@@ -275,7 +275,7 @@ client.on('messageCreate', async (message) => {
                                 break;
                             default:
                                 message.channel.send({
-                                    content: "Hubo un error! Por favor reportalo con `sera report <problema>`",
+                                    content: "Hubo un error! Por favor reportalo con `" + sistema.altPrefix + " report <problema>`",
                                     flags: MessageFlags.Ephimeral
                                 })
                         }

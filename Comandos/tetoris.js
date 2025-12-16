@@ -21,7 +21,7 @@ prototype = {
             .setColor(client.member.displayColor)
             .addFields(
                 { name: "Juegos totales:", value: user.gamesplayed.toString()},
-                { name: "Tpp Global 40L:", value: userSummary["40l"].rank.toString(), inline: true },
+                { name: "Top Global 40L:", value: userSummary["40l"].rank.toString(), inline: true },
                 { name: "Top Local 40L:", value: userSummary["40l"].rank_local.toString(), inline: true },
                 { name: '\u200b', value: '\u200b' , inline: true},
                 { name: "Top Global League:", value: (userSummary.league.standing == -1 ? "N/A" : userSummary.league.standing ).toString(), inline: true },

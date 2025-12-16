@@ -23,7 +23,7 @@
     }
 
     checkCosto(user, multiplier = this.cantidad, bypass) {
-        return user.currency > this.calculateCosto(multiplier);
+        return user.currency >= this.calculateCosto(multiplier);
     }
 
     getCantidad() {

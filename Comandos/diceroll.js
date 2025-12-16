@@ -32,7 +32,7 @@ prototype = {
                 diceResults.push((1 + ~~(Math.random() * die)));
             }
 
-            
+            let total = (diceResults.reduce((curr, tot) => curr + tot));
 
             results.push(
                 diceAmount + "d" + dieFace  +
@@ -41,7 +41,7 @@ prototype = {
                 "```" +
                 "Total: " +
                 "```" +
-                (diceResults.reduce((curr, tot) => curr + tot))
+                total
                 + "```" +
                 "Min: " +
                 "```" +
@@ -50,12 +50,16 @@ prototype = {
                 "Max: " +
                 "```" +
                 (Math.max(...diceResults))
+                + "```" +
+                "Avg: " +
+                "```" +
+                Math.round(10 * total / diceAmount) / 10
                 + "```" 
             );
         }
 
         if (results.join(" ").length > 4096) {
-            message.reply("Eso es demasiado grande para mi uwu");
+            await message.reply("Eso es demasiado grande para mi uwu");
             throw "EMBED_CONTENT_EXCEDEED_MAX";
         }
 

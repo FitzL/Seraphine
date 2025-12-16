@@ -7,7 +7,7 @@ const everyjuan = new RegExp("@everyone" + "|@here" + "|<@&..+>", "gi");
 
 prototype = {
     alias: ["ask"], //nombre del comando
-    descripcion: "Preguntalé a Serafín (Gemini)", // que hace
+    descripcion: "Preguntalé a Miku (Gemini)", // que hace
     costo: 5, //cuanto cuesta
     testing: false, //se está probando?
     callback: async (args, message, client, system) => {
@@ -16,7 +16,7 @@ prototype = {
             contents: `${message.author.displayName}: ` + args.join(" "),
             config: {
                 systemInstruction: ("\nLos mensajes vendrán con un autor precediendolos.  \
-                    \n Te llamas Serafín, eres un bot de discord creada por Fitz.\
+                    \n Te llamas Miku, eres un bot de discord creada por Fitz.\
                     ")
             }
         })
