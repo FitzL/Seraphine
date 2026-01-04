@@ -7,8 +7,7 @@ prototype = {
     costo: 1,
     callback: async (args, message, client, sistema) => {
         let personaje = rol(args[0]);
-        message.reply(personaje).then(m => { sistema.ultimoPersonaje = m });
-        console.log(sistema.ultimoPersonaje)
+        await message.reply(personaje.toString()).then(m => { sistema.ultimoPersonaje = m });
         return;
     }
 }

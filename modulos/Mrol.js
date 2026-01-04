@@ -1,40 +1,91 @@
-function rol(mana = "") {
-    const pv1 = Dado(6);
-    const pv2 = Dado(6);
-    const pv = `PV: ${pv1 + pv2} [d6 (${pv1}) + d6 (${pv2})]\n`;
-    let ma;
-    if (mana.toLowerCase() === "si") {
-        const ma1 = Dado(6);
-        const ma2 = Dado(6);
-        ma = `Mana: ${ma1 + ma2} [d6 (${ma1}) + d6 (${ma2})]\n`;
-    } else {
-        ma = `Mana: ${Dado(6)}\n`;
-    }
-    const def = `Defensa: ${Dado(4)}\n`;
-    const mr = `Defensa Magica: ${Dado(4)}\n`
+const StatToIndex = new Map([
+    ["FUE", 0],
+    ["DES", 1],
+    ["CON", 2],
+    ["INT", 3],
+    ["SAB", 4],
+    ["FÉ", 5],
+    ["FE", 5],
+    ["ESP", 6],
+    ["CAR", 7]
+ ])
 
-    let atributos = [];
-    let i = 7;
-    while (i--) {
-        atributos += Dado(6);
-    }
+const IndexToStat = [
+    "FUE",
+    "DES",
+    "CON",
+    "INT",
+    "SAB",
+    "FÉ ",
+    "ESP",
+    "CAR"
+]
 
-    let fue = "FUE: " + atributos[0] + "\n";
-    let des = "DES: " + atributos[1] + "\n";
-    let con = "CON: " + atributos[2] + "\n";
-    let pun = "PUN: " + atributos[3] + "\n";
-    let int = "INT: " + atributos[4] + "\n";
-    let sab = "SAB: " + atributos[5] + "\n";
-    let sue = "SUE: " + atributos[6];
-
-    let output = "# Stats: \n" + pv + ma + def + mr + "# Atributos: \n" + fue + des + con + pun + int + sab + sue;
-
-    return output;
+const DiceAmount = {
+    pv: 10,
+    baseStat: 2,
+    primeStat: 3,
+    mana: 2,
 }
 
-function Dado(max = 20, min = 1) {
-    return ~~(Math.random() * (max - min + 1) + min);
+const Personaje = class {
+    constructor(primeStat)
+    {
+        this.stats = Array(IndexToStat.length).fill(0);
+        this.primeStat = primeStat;
+
+        let dice = Dado(10, 1, DiceAmount.pv);
+        this.pv = dice.reduce((x,y) => x + y);
+        dice = Dado(10, 1, DiceAmount.mana);
+        this.mana = dice.reduce((x,y) => x + y);
+        this.def = Dado(6);
+        this.rma = Dado(6);
+
+        for (let stat in this.stats) {
+            if (primeStat == stat) 
+                this.stats[stat] = Dado(6, 1, DiceAmount.primeStat).reduce((x,y) => x + y) + " ♦";
+            else 
+                this.stats[stat] = Dado(6,1,DiceAmount.baseStat).reduce((x,y) => x + y);
+        }
+    }
+
+    toString() {
+        let a = "";
+        for (let stat in this.stats) {
+            a += "\n" + IndexToStat[stat] + ":  " + this.stats[stat]
+        }
+
+        return "# Stats:" +
+        "\nPV: " + this.pv +
+        "\nManá: " + this.mana +
+        "\nResistencia Física:  " + this.def +
+        "\nResistencia Mágica: " + this.rma +
+
+        "\n# Atributos: " + a;
+    }
+}
+
+function CreateCharacter(stat = "FUE") {
+    stat = stat.toUpperCase(stat);
+
+
+    stat = StatToIndex.has(stat) ? StatToIndex.get(stat) : "FUE";
+
+    //if (stat == undefined || stat == "") stat = IndexToStat[~~(Math.random() * IndexToStat.length)];
+
+    let personaje = new Personaje(stat);
+
+    return personaje;
+}
+
+function Dado(max = 6, min = 1, amount = 1) {
+    if (amount == 1) return ~~(Math.random() * (max - min + 1) + min);
+    Dice = [];
+    do {
+        Dice.push(~~(Math.random() * (max - min + 1) + min));
+    } while (--amount > 0);
+    return Dice;
 }
 
 
-module.exports.rol = rol;
+module.exports.rol = CreateCharacter;
