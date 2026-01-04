@@ -43,7 +43,7 @@ const Personaje = class {
 
         for (let stat in this.stats) {
             if (primeStat == stat) 
-                this.stats[stat] = Dado(6, 1, DiceAmount.primeStat).reduce((x,y) => x + y) + " ♦";
+                this.stats[stat] = Dado(6, 1, DiceAmount.primeStat).reduce((x,y) => x + y) + "♦";
             else 
                 this.stats[stat] = Dado(6,1,DiceAmount.baseStat).reduce((x,y) => x + y);
         }
@@ -52,14 +52,14 @@ const Personaje = class {
     toString() {
         let a = "";
         for (let stat in this.stats) {
-            a += "\n" + IndexToStat[stat] + ":  " + this.stats[stat]
+            a += "\n`" + IndexToStat[stat] + ":` `" + (this.stats[stat] +  "").padStart(5,  " ") + "`";
         }
 
         return "# Stats:" +
-        "\nPV: " + this.pv +
-        "\nManá: " + this.mana +
-        "\nResistencia Física:  " + this.def +
-        "\nResistencia Mágica: " + this.rma +
+        "\n`PV: ".padEnd(25, " ") + "` `" + (this.pv + "").padStart(3, " ") + "`" +
+        "\n`Maná: ".padEnd(25, " ") + "` `" + (this.mana + "").padStart(3, " ") + "`" +
+        "\n`Resistencia Física: ".padEnd(25, " ") + "` `" + (this.def + "").padStart(3, " ") + "`" +
+        "\n`Resistencia Mágica: ".padEnd(25, " ") + "` `" + (this.rma + "").padStart(3, " ") + "`" +
 
         "\n# Atributos: " + a;
     }

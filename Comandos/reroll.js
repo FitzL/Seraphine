@@ -7,7 +7,9 @@ prototype = {
     costo: 0,
     callback: async (args, message, client, sistema) => {
         if (sistema.ultimoPersonaje == 0) return message.reply("No se a que hacerle reroll pendejo");
-        return sistema.ultimoPersonaje.edit(rol(args[0]))
+        console.log(sistema.ultimoPersonaje);
+        message.delete();
+        return sistema.ultimoPersonaje.edit(rol(args[0]).toString())
     }
 }
 
