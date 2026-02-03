@@ -49,7 +49,7 @@ let sereneRechazos = [
 ]
 
 var message;
-const prefix = "s.";
+const prefix = "m.";
 const altPrefix = "miku";
 
 var sistema = {
@@ -69,8 +69,11 @@ var sistema = {
     findOneMember: findOneMember,
 }
 
-const everyjuan = new RegExp("@everyone" + "|@here" + "|<@&..+>", "gi");
+const everyjuan = new RegExp("@everyone|@here|<@&..+>", "gi");
 const balatro = new RegExp("balatro|poker|jimbo");
+const lichessGame = new RegExp(
+    "(?:https:/+?lichess.+?/)([a-z0-9]+)(?:/)(.+)(?:#[0-9]+)" +
+    "|(?:https:/+?lichess.+?/)([a-z0-9]+)(?:/)?", "gmi");
 
 // const { REST, Routes} = require('discord.js');
 // const rest = new REST({ version: '10' }).setToken(token);
@@ -186,8 +189,11 @@ client.on('messageCreate', async (message) => {
 
     //react if mentioned
 
-    //if (message.content.toLowerCase().match(ser)) message.react("<:kyuserio:1317896754422616144>");
+    if (message.content.toLowerCase().match(ser)) message.react("<:kyuserio:1317896754422616144>");
     if (message.content.toLowerCase().match(balatro)) message.react("🃏");
+    if (message.content.toLowerCase().match(lichessGame)) {
+        message.channel.send(await LichessGiffer(message.content));
+    };
 
     //escape if no prefix (may changed it later)
     if (messageTokens.length < 1) return; //check for empty messages
@@ -471,4 +477,12 @@ async function bumpReward(dbuserid, _message) {
     await _message.react("2️⃣")
     await _message.react("📦")
     return;
+}
+
+async function LichessGiffer(msg) {
+    let groups = [...msg.matchAll(lichessGame)].flat().filter(n=>n!==undefined);
+    console.log(groups)
+    if (groups[2] != undefined)
+        return `https://lichess1.org/game/export/gif/${groups[2]}/${groups[1]}.gif`
+    return `https://lichess1.org/game/export/gif/white/${groups[1]}.gif`
 }

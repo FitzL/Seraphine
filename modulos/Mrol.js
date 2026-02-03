@@ -73,9 +73,7 @@ function CreateCharacter(stat = "FUE") {
 
     //if (stat == undefined || stat == "") stat = IndexToStat[~~(Math.random() * IndexToStat.length)];
 
-    let personaje = new Personaje(stat);
-
-    return personaje;
+    return new Personaje(stat);
 }
 
 function Dado(max = 6, min = 1, amount = 1) {
