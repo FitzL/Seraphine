@@ -2,7 +2,7 @@
 
 prototype = {
     alias: ["silenciogil", "silencio", "calla", "mute"], //nombre del comando
-    descripcion: "boop", // que hace
+    descripcion: "Silencio Gil", // que hace
     costo: 30, //cuanto cuesta
     testing: false, //se está probando?
     callback: async (args, message, client, system) => {

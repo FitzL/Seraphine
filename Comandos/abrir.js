@@ -11,6 +11,11 @@ const robpct = 0.15;
 const { Command } = require("../modulos/MCommand.js");
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlags } = require('discord.js');
 
+const ChannelBlacklist = 
+  [
+    "1126988705513619516",
+    "1465094200839373024"
+]
 prototype = {
     alias: ["abrir", "box", "open", "caja", "ouvrir"], //nombre del comando
     descripcion: "Abre una o mas cajas.", // que hace
@@ -25,7 +30,7 @@ prototype = {
         message = _message;
         serafin = await dbclient.findUser("1316479184050192384").catch((e) => { console.log });
 
-        if (message.channel.id == "1126988705513619516") return message.reply(
+        if (ChannelBlacklist.includes(message.channel.id)) return message.reply(
             { content: `Por favor ve a otro canal`, flags: MessageFlags.Ephemeral }
         )
 
@@ -58,8 +63,8 @@ const lt_A = {
     caja: 11_00,
     pifia: 10_00,
     mini: 30_00,
-    mini_troll: 10_00,
-    normal: 25_00,
+    mini_troll: 20_00,
+    normal: 20_00,
     grande: 10_00,
     rob: 2,
 }

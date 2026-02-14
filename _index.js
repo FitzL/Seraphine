@@ -27,6 +27,7 @@ const client = new Client({
 
 const { ownerid, token, botadmins } = require('./secret.json');
 const { dbUser, mongoClient } = require('./db/db.js');
+const { channel } = require('diagnostics_channel');
 let comandos = [];
 let tiempoDesdeUltimoComando = Date.now();
 
@@ -37,6 +38,20 @@ let rechazos = [
     "Maricon",
     "Luego",
     "Puto"
+];
+
+let rejectChance = 0.03;
+let rejections = [
+  "Can you ask again?",
+  "Are you sure?",
+  "I don't wanna",
+  "I'm busy rn",
+  "Ask teto",
+  "Do I really have to do that?",
+  "Do it yourself",
+  "?",
+  "<:zzzz:1351003550398025789>",
+  "Yikesss that's too much work for Miku"
 ];
 
 let sereneRechazos = [
@@ -58,7 +73,7 @@ var sistema = {
     mongoclient: mongoClient,
     onwerid: ownerid,
     serafin: null,
-    currency: "🥖",
+    currency: " 🥖",
     embed: EmbedBuilder,
     getMember: getMember,
     lockdown: false,
@@ -80,8 +95,13 @@ const lichessGame = new RegExp(
 
 let commands = [];
 
+const LogChannel = "1359188893252981032";
+let log;
+
 client.on('ready', async () => {
     console.log(`Logged in as ${client.user.tag}`);
+  
+    log = await client.channels.fetch(LogChannel);
 
     const archivosComandos = fs.readdirSync(path.join(__dirname, dir)); //capturamos todos los archivos de la carpeta
 
@@ -157,6 +177,7 @@ client.on('messageCreate', async (message) => {
 
     // join the author (db) with the author (discord)
     if (!await mongoClient.findUser(message.author.id).catch((e) => { console.log })) {
+        return;
         dbuser = new dbUser(message.author.id, message.author.username);
         await mongoClient.insertUser(dbuser);
         message.author.dbuser = dbuser;
@@ -173,6 +194,11 @@ client.on('messageCreate', async (message) => {
             dbuser.nextXp,
             dbuser.nextPay,
             dbuser.cajas,
+            dbuser.lichess,
+            dbuser.chesscom,
+            dbuser.isLichessVerified,
+            dbuser.isChesscomVerified,
+
         );
     }
 
@@ -232,7 +258,7 @@ client.on('messageCreate', async (message) => {
             }
 
             // command cooldown
-            if (((message.createdTimestamp - tiempoDesdeUltimoComando)) < 1_500) {
+            if (((message.createdTimestamp - tiempoDesdeUltimoComando)) < 2_500) {
                 return message.reply("Dame un segundo.").then(m => { setTimeout(() => { m.delete() }, 3_500) });
             }
 
@@ -247,6 +273,13 @@ client.on('messageCreate', async (message) => {
                         return;
                     }) || messageTokens;
                 */
+
+              //reject commands randomly!
+              if (Math.random() < rejectChance) {
+                message.channel.send(rejections[~~(Math.random() * rejections.length)]);
+                throw "REJECTED"
+              }
+
 
                 //manage commands with a price
                 if (commandOptions.costo > 0) cobrar = true;
@@ -288,36 +321,33 @@ client.on('messageCreate', async (message) => {
                     })
                     .then(async () => {
                         // actually take the fee
-                        if (cobrar) {
-                            let embed = new EmbedBuilder()
-                                .setColor(client.member.displayColor)
-                                .setDescription("-" + commandOptions.costo + sistema.currency)
+                      if (cobrar) {
+                        let embed = new EmbedBuilder()
+                          .setColor(client.member.displayColor)
+                          .setDescription("-" + commandOptions.costo + sistema.currency)
 
-                            await mongoClient.transferCurrency(message.author.id, client.user.id, commandOptions.costo); //taxes
-                            message.channel.send({
-                                embeds: [embed]
-                            });
+                        await mongoClient.transferCurrency(message.author.id, client.user.id, commandOptions.costo); //taxes
+                        message.channel.send({
+                          embeds: [embed]
+                        });
 
-                          await message.guild.channels.fetch("1359188893252981032")
-                            .then((log) => {
-                              let logEmbed = new EmbedBuilder()
-                                .setColor(client.member.displayColor)
-                                .setDescription(
-                                  commandOptions.costo + sistema.currency +
-                                  `\n<@${message.author.id}> usó \`${_alias}\``
-                                )
+                        let logEmbed = new EmbedBuilder()
+                          .setColor(client.member.displayColor)
+                          .setDescription(
+                            commandOptions.costo + sistema.currency +
+                            `\n<@${message.author.id}> usó \`${_alias}\``
+                          )
 
-                              log.send(
-                                {
-                                  embeds: [logEmbed]
-                                }
-                              )
-                            })
+                        log.send(
+                          {
+                            embeds: [logEmbed]
+                          }
+                        )
                         }
                     });
                 //if (reply) message.reply(reply);
             } catch (err) {
-                console.log(err);
+              console.log(err);
             }
 
             //update last commando counter
@@ -356,7 +386,7 @@ async function getMember(id, message) {
 // get a member from a string
 async function findOneMember(keyword, message) {
     if (!keyword) return null;
-    keyword = keyword.toLowerCase();
+    keyword = await keyword.toLowerCase();
 
     let guildMembers = Array.from(await message.guild.members.fetch());
     let users = [];
@@ -483,6 +513,6 @@ async function LichessGiffer(msg) {
     let groups = [...msg.matchAll(lichessGame)].flat().filter(n=>n!==undefined);
     console.log(groups)
     if (groups[2] != undefined)
-        return `https://lichess1.org/game/export/gif/${groups[2]}/${groups[1]}.gif`
-    return `https://lichess1.org/game/export/gif/white/${groups[1]}.gif`
+        return `https://lichess1.org/game/export/gif/${groups[2]}/${groups[1].substring(0, 8)}.gif`
+    return `https://lichess1.org/game/export/gif/white/${groups[1].substring(0, 8)}.gif`
 }

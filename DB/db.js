@@ -27,9 +27,28 @@ class User{
     lastActivity;
     nextXp;
     nextPay;
-    cajas;
+  cajas;
+  lichess;
+  chesscom;
+  isLichessVerified;
+  isChesscomVerified;
 
-    constructor(_id, _username, _xp = 0, _lvl, _currency = 0, _lastActivity = Date.now(), _nextXp = Date.now(), _nextPay, _cajas = 1) {
+  constructor(
+    _id,
+    _username,
+    _xp = 0,
+    _lvl,
+    _currency = 0,
+    _lastActivity = Date.now(),
+    _nextXp = Date.now(),
+    _nextPay,
+    _cajas = 1,
+    _lichess = null,
+    _chesscom = null,
+    _isLichessVerified = false,
+    _isChesscomVerified = false
+  )
+  {
         this._id = _id;
         this.username = _username;
 
@@ -39,7 +58,12 @@ class User{
         this.lvl = this.#calculateLvl();
         this.nextXp = _nextXp;
         this.nextPay = _nextPay;
-        this.cajas = _cajas;
+    this.cajas = _cajas;
+    this.lichess =_lichess;
+    this.chesscom =_chesscom;
+    this.isLichessVerified =_isLichessVerified;
+    this.isChesscomVerified = _isChesscomVerified;
+
     }
 
     #checkXpTimer() {

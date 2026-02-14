@@ -2,7 +2,7 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlags } = require('discord.js');
 
 prototype = {
-    alias: ["leaderboard", "lb", "top"], //nombre del comando
+    alias: ["leaderboard", "lb", "top", "ranking"], //nombre del comando
     descripcion: "Muestra los mas ricos del server", // que hace
     costo: 0, //cuanto cuesta
     testing: false, //se está probando?
