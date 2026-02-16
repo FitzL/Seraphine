@@ -187,14 +187,14 @@ class mongodb {
 
     async insertUser (user) {
         if (!user || user == null) return;
-        if (await this.findUser(user._id).catch(() => { console.log })) throw "USER_ALREADY_EXISTS";
-        await this.users.insertOne(user);
+        if (this.findUser(user._id).catch(() => { console.log })) throw "USER_ALREADY_EXISTS";
+        this.users.insertOne(user);
     }
 
     async updateUser (id, field, content) {
         if (!field || !id) throw "MISSING_FIELD_OR_ID";
 
-        await this.users.updateOne({_id: id}, {$set: {[field]: content}})
+        this.users.updateOne({_id: id}, {$set: {[field]: content}})
     }
 
     async deleteUser(user) {
@@ -206,8 +206,8 @@ class mongodb {
     async transferCurrency(_alice, _bob, amount = 0) {
         if (_alice == _bob) throw "A_AND_B_ARE_EQUAL";
         console.log(`alice(${_alice}) is sending ` + amount + ` to bob(${_bob}).`)
-        let alice = await this.findUser(_alice);
-        let bob = await this.findUser(_bob);
+        let alice = this.findUser(_alice);
+        let bob = this.findUser(_bob);
 
         if (isNaN(amount)) throw "NAN";
 
@@ -218,32 +218,46 @@ class mongodb {
 
         amount = parseInt(amount);
 
-        alice.currency -= amount; await this.updateUser(alice._id, "currency", alice.currency);
-        bob.currency += amount; await this.updateUser(bob._id, "currency", bob.currency);
+        this.users.updateOne(
+          { _id: _alice },
+          { $inc: { currency: -amount } }
+        );
+
+        this.users.updateOne(
+          { _id: _bob },
+          { $inc: { currency: amount } }
+        );
+
     }
 
     async addCurrency(_alice, amount = 1) {
         if (!_alice) throw "NO_TARGET";
-        let alice = await this.findUser(_alice);
+        let alice = this.findUser(_alice);
 
         if (isNaN(amount)) throw "NAN";
         amount = parseInt(amount);
 
         if (alice.currency < -amount) amount = -alice.currency;
 
-        alice.currency += amount; await this.updateUser(alice._id, "currency", alice.currency);
+        this.users.updateOne(
+          { _id: _alice },
+          { $inc: { currency: amount } }
+        );
     }
 
     async addBox(_alice, amount = 1) {
         if (!_alice) throw "NO_TARGET";
-        let alice = await this.findUser(_alice);
+        let alice = this.findUser(_alice);
 
         if (isNaN(amount)) throw "NAN";
         amount = parseInt(amount);
 
         if (alice.cajas < -amount) throw "NO_BOXES"
 
-        alice.cajas += amount; await this.updateUser(alice._id, "cajas", alice.cajas);
+        this.users.updateOne(
+          { _id: _alice },
+          { $inc: { cajas: amount } }
+      );
     }
 }
 

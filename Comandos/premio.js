@@ -11,23 +11,17 @@ prototype = {
         notamount = 1;
 
         let amount = args[0] || 1;
-        if (isNaN(parseInt(amount))) { amount = args[1]; notamount-- };
+        if (isNaN(parseInt(amount))) { amount = args[1]; notamount = 0};
         if (!amount || isNaN(amount)) amount = 1;
         costo *= ~~amount;
         console.log(costo);
 
         if (costo > message.author.dbuser.currency) return message.reply("Pobre");
 
-        let target = message.mentions.users.first() || await system.findOneMember(args[notamount], message);
-
-        target = !target ? message.member : target;
-
-        if (!target) {
-            await message.reply("Y a quien se lo mando?");
-            throw "err";
-        }
+        let target = message.mentions.users.first() || await system.findOneMember(args[notamount], message) || message.member;
 
         target = await system.mongoclient.findUser(target.id).catch((e) => console.log);
+        if (!target) return message.reply("Who do you want to gift a box to?");
 
         if (target._id == message.author.id) {
             await message.channel.send("<:raoralaugh:1343492065954103336>");
@@ -36,12 +30,12 @@ prototype = {
             costo += ~~(costo * .19)
         }
 
-        if (costo > message.author.dbuser.currency) return message.reply("Pobre");
+        if (costo > message.author.dbuser.currency) return message.reply("Broke ahh");
 
         console.log("there is this many boxes: ", amount)
 
         if (amount == null) {
-            return message.reply("Cuantas cajas querés mandar?")
+            return message.reply("How many boxes??")
         }
 
         await system.mongoclient.addBox(target._id, amount).catch((e) => {
@@ -63,20 +57,16 @@ prototype = {
 
       message.channel.send({ embeds: [embed] });
 
-      await message.guild.channels.fetch("1359188893252981032")
-        .then((log) => {
-          let logEmbed = new system.embed()
-            .setColor(client.member.displayColor)
-            .setDescription(
-              costo + system.currency +
-              `\n<@${message.author.id}> usó \`buy\``
-            )
 
-          log.send(
-            {
-              embeds: [logEmbed]
-            }
-          )
+      let logEmbed = new system.embed()
+        .setColor(client.member.displayColor)
+        .setDescription(
+          costo + system.currency +
+          `\n<@${message.author.id}> usó \`buy\``
+        )
+
+      await system.logChannel.send({
+          embeds: [logEmbed]
         })
 
         return;

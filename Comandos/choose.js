@@ -12,12 +12,12 @@ prototype = { //
 
         const test = new system.embed()
             .setColor(client.member.displayColor)
-            .setTitle("Elijo...")
+            .setTitle("I choose...")
             .setDescription(resultado)
 
         const denuevo = new ButtonBuilder()
             .setCustomId('again')
-            .setLabel('Otra vez!')
+            .setLabel('Again!')
             .setStyle(1);
 
         const buttons = new ActionRowBuilder()
@@ -38,7 +38,7 @@ prototype = { //
 
                     const test = new system.embed()
                         .setColor(client.member.displayColor)
-                        .setTitle("Elijo...")
+                        .setTitle("I choose...")
                         .setDescription(resultado);
 
                     i.update({

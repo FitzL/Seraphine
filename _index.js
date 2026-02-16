@@ -81,14 +81,15 @@ var sistema = {
     commands: [],
     prefix: prefix,
     altPrefix: altPrefix,
-    findOneMember: findOneMember,
+  findOneMember: findOneMember,
+    logChannel: null,
 }
 
 const everyjuan = new RegExp("@everyone|@here|<@&..+>", "gi");
 const balatro = new RegExp("balatro|poker|jimbo");
 const lichessGame = new RegExp(
-    "(?:https:/+?lichess.+?/)([a-z0-9]+)(?:/)(.+)(?:#[0-9]+)" +
-    "|(?:https:/+?lichess.+?/)([a-z0-9]+)(?:/)?", "gmi");
+    "(?:https:/+?lichess\..+?/)([a-z0-9]+)(?:/)(.+)(?:#[0-9]+)" +
+    "|(?:https:/+?lichess\..+?/)([a-z0-9]+)(?:/)?", "gmi");
 
 // const { REST, Routes} = require('discord.js');
 // const rest = new REST({ version: '10' }).setToken(token);
@@ -102,6 +103,7 @@ client.on('ready', async () => {
     console.log(`Logged in as ${client.user.tag}`);
   
     log = await client.channels.fetch(LogChannel);
+    sistema.logChannel = log
 
     const archivosComandos = fs.readdirSync(path.join(__dirname, dir)); //capturamos todos los archivos de la carpeta
 
@@ -130,8 +132,8 @@ client.on('ready', async () => {
     }).catch((err) => {
         console.log("There's been an error connecting to the database :(");
     }).finally(async () => {
-        sistema.serafin = await mongoClient.findUser(client.user.id);
-        sistema.currency = sistema.serafin.serverCurrency;
+      sistema.serafin = await mongoClient.findUser(client.user.id);
+      sistema.currency = sistema.serafin.serverCurrency;
         sistema.lockdown = sistema.serafin.lockdown;
     });
 })
@@ -154,7 +156,7 @@ client.on('messageCreate', async (message) => {
         console.log("ask");
         message.member.timeout(180_000, "neko ask en general").catch(
             (err) => {
-                return message.reply("No te puedo mutear, pero deja de joder")
+                return message.reply("I can't mute you, stahp")
             }
         );
         message.reply("Chuu!")
@@ -166,7 +168,7 @@ client.on('messageCreate', async (message) => {
     client.member = await message.guild.members.fetch(client.user.id);
     let ser;
     try {
-         ser = new RegExp("<@1316479184050192384>|1316479184050192384|" + client.member.nickname.toLowerCase() + "|" + client.user.username.toLowerCase());
+          ser = new RegExp("<@1316479184050192384>|1316479184050192384|" + client.member.nickname.toLowerCase() + "|" + client.user.username.toLowerCase());
     }
     catch (e) {
         ser = new RegExp("<@1316479184050192384>|1316479184050192384|" + client.user.username.toLowerCase())
@@ -176,10 +178,10 @@ client.on('messageCreate', async (message) => {
     let dbuser = await mongoClient.findUser(message.author.id).catch((e) => { console.log });
 
     // join the author (db) with the author (discord)
-    if (!await mongoClient.findUser(message.author.id).catch((e) => { console.log })) {
+    if (!mongoClient.findUser(message.author.id).catch((e) => { console.log })) {
         return;
         dbuser = new dbUser(message.author.id, message.author.username);
-        await mongoClient.insertUser(dbuser);
+        mongoClient.insertUser(dbuser);
         message.author.dbuser = dbuser;
 
         console.log("couldn't find db user, making one...");
@@ -218,7 +220,7 @@ client.on('messageCreate', async (message) => {
     if (message.content.toLowerCase().match(ser)) message.react("<:kyuserio:1317896754422616144>");
     if (message.content.toLowerCase().match(balatro)) message.react("🃏");
     if (message.content.toLowerCase().match(lichessGame)) {
-        message.channel.send(await LichessGiffer(message.content));
+        message.channel.send(LichessGiffer(message.content));
     };
 
     //escape if no prefix (may changed it later)
@@ -237,6 +239,9 @@ client.on('messageCreate', async (message) => {
     }
     else wasPrefixNotUsed = true;
 
+    //check how the bot is doing
+    sistema.serafin = await mongoClient.findUser(client.user.id);
+    sistema.currency = sistema.serafin.serverCurrency;
 
     for (const commandOptions of comandos) {
         if (wasPrefixNotUsed) break;
@@ -252,7 +257,7 @@ client.on('messageCreate', async (message) => {
 
             //limit who can mess with wip commands
             if (commandOptions.testing && (!botadmins.includes(message.author.id))) {
-                message.reply("No, jodete.");
+                message.reply("No, Fuck you.");
                 message.channel.send("<:ayweno:1167952675158110308>");
                 return;
             }
@@ -285,10 +290,10 @@ client.on('messageCreate', async (message) => {
                 if (commandOptions.costo > 0) cobrar = true;
                 //if (isNaN(message.author.dbuser.currency) == true) return message.reply("<@443966554078707723> hiciste algo mal, pendejo. Alguien tiene NaN" + sistema.currency);
                 if (cobrar && !commandOptions.checkCosto(message.author.dbuser)) {
-                    message.channel.send("No le hago caso a gente pobre").then(m => {
+                    message.channel.send("I don't listen to poor people.").then(m => {
                         message.channel.send("<:raoralaugh:1343492065954103336>");
                         setTimeout(() => {
-                            message.reply("Pero lo haría por unos " + commandOptions.costo + sistema.currency + " :3");
+                            message.reply("I'd do it for " + commandOptions.costo + sistema.currency + " tho :3");
                         }, 3_000);
                     });
 
@@ -314,7 +319,7 @@ client.on('messageCreate', async (message) => {
                                 break;
                             default:
                                 message.channel.send({
-                                    content: "Hubo un error! Por favor reportalo con `" + sistema.altPrefix + " report <problema>`",
+                                    content: "There has been an error! You can report it with: `" + sistema.altPrefix + " report <problem>` so the dev can ignore you.",
                                     flags: MessageFlags.Ephimeral
                                 })
                         }
@@ -324,7 +329,7 @@ client.on('messageCreate', async (message) => {
                       if (cobrar) {
                         let embed = new EmbedBuilder()
                           .setColor(client.member.displayColor)
-                          .setDescription("-" + commandOptions.costo + sistema.currency)
+                          .setDescription("+" + commandOptions.costo + sistema.currency + " to me.")
 
                         await mongoClient.transferCurrency(message.author.id, client.user.id, commandOptions.costo); //taxes
                         message.channel.send({
@@ -358,15 +363,15 @@ client.on('messageCreate', async (message) => {
 
     if (message.mentions.members.first() == client.member.id && !wasMessageACommand && !message.mentions.repliedUser) {
         message.reply(
-            "Para  usar comandos escribe `" +
+            "To use commands type `" +
             altPrefix +
-            "` <comando> o `" +
+            "` <command> o `" +
             prefix +
-            "`<comando>\n-# " +
+            "`<command>\n-# " +
             altPrefix +
-            " p, o , " +
+            " p, or , " +
             prefix +
-            "p. Por ejemplo"
+            "p. For example."
         );
     }
 })
@@ -385,7 +390,7 @@ async function getMember(id, message) {
 
 // get a member from a string
 async function findOneMember(keyword, message) {
-    if (!keyword) return null;
+    if (!keyword || keyword === undefined) return undefined;
     keyword = await keyword.toLowerCase();
 
     let guildMembers = Array.from(await message.guild.members.fetch());
@@ -395,9 +400,9 @@ async function findOneMember(keyword, message) {
         users.push(
             {
                 id: member[1].id,
-                username: member[1].user.username,
-                nickname: member[1].user.globalName,
-                displayName: member[1].displayName,
+                username: member[1].user.username ?? "",
+                nickname: member[1].user.globalName ?? "",
+                displayName: member[1].displayName ?? "",
             }
         )
     })
@@ -405,7 +410,7 @@ async function findOneMember(keyword, message) {
     let primerMatch = null;
 
     await users.forEach(async (user) => {
-        if (user.id.match(keyword) || user.displayName.toLowerCase().match(keyword) ||  user.username.toLowerCase().match(keyword) || (user.nickname && user.nickname.toLowerCase().match(keyword))) {
+      if (user.id.match(keyword) || (user.nickname && user.nickname.toLowerCase().match(keyword)) || user.username.toLowerCase().match(keyword) || user.displayName.toLowerCase().match(keyword)) {
             primerMatch = user.id;
             return;
         }
@@ -501,17 +506,16 @@ function sanitise(str) {
 }
 
 async function bumpReward(dbuserid, _message) {
-    await mongoClient.addBox(dbuserid, 2).catch((e) => {
+    await mongoClient.addBox(dbuserid, 1).catch((e) => {
         console.log
     });
-    await _message.react("2️⃣")
+  await _message.react("1️⃣")
     await _message.react("📦")
     return;
 }
 
 async function LichessGiffer(msg) {
     let groups = [...msg.matchAll(lichessGame)].flat().filter(n=>n!==undefined);
-    console.log(groups)
     if (groups[2] != undefined)
         return `https://lichess1.org/game/export/gif/${groups[2]}/${groups[1].substring(0, 8)}.gif`
     return `https://lichess1.org/game/export/gif/white/${groups[1].substring(0, 8)}.gif`

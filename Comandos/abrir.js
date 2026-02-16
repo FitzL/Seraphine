@@ -30,12 +30,14 @@ prototype = {
         message = _message;
         serafin = await dbclient.findUser("1316479184050192384").catch((e) => { console.log });
 
+      if (serafin.currency < 200) return message.reply("I'm hungry rn");
+
         if (ChannelBlacklist.includes(message.channel.id)) return message.reply(
-            { content: `Por favor ve a otro canal`, flags: MessageFlags.Ephemeral }
+            { content: `Go to another channel.`, flags: MessageFlags.Ephemeral }
         )
 
         if (isNaN(_message.author.dbuser.cajas) || _message.author.dbuser.cajas < 1) {
-            _message.reply("No tenés cajas, 'ché");
+            _message.reply("No boxes fam");
             return;
         }
 
@@ -45,7 +47,7 @@ prototype = {
         else if (_message.author.dbuser.cajas >= args[0]) {
             return multiOpen(_message.author.dbuser, args[0]);
         } else {
-            message.reply("No tenés tantas cajas, 'ché");
+            message.reply("You don't got all that bruv");
         }
     }
 }
@@ -142,7 +144,7 @@ async function multiOpen(dbuser, amount) {
     var lotoMoney = ~~(serafin.currency * robpct);
     var loto = false;
 
-    while (amount--) {
+    while (amount-- && serafin.currency > 0) {
         let rndnumber = ~~(Math.random() * 100_000) / 1_000;
         let prize = "";
 
@@ -182,22 +184,25 @@ async function multiOpen(dbuser, amount) {
                 totalCurrency -= _mini;
                 break;
         }
-    };
+  };
+  let opening = "There were ";
+  let closing = "inside. ";
+  let lototxt = "AND YOU WON THE LOTERRY!"
+
     console.log(totalCurrency, totalBoxes)
     let embed = new system.embed()
         .setColor(message.member.displayColor)
-        .setDescription("Habían " + totalCurrency + system.currency + " y " + totalBoxes + "📦" + " dentro.");
+        .setDescription(opening + totalCurrency + system.currency + " and " + totalBoxes + "📦 ");
 
-    if (totalBoxes == 0) embed.setDescription("Habían " + totalCurrency + system.currency + " dentro.");
+    if (totalBoxes == 0) embed.setDescription(opening + totalCurrency + system.currency);
 
-    if (loto == true) embed.setDescription("Habían " + totalCurrency + system.currency + " y " + totalBoxes + "📦" + " dentro. Y ganaste la lotería.");;
+    if (loto == true) embed.setDescription(opening + totalCurrency + system.currency + " and " + totalBoxes + "📦 " + closing + lototxt);;
 
     dbclient.addBox(dbuser._id, totalBoxes);
     dbclient.transferCurrency(serafin._id, dbuser._id, totalCurrency);
 
-    return message.channel.send({ embeds: [embed] });
+    return await message.channel.send({ embeds: [embed] });
 }
-
 
 // Methods for single Box opening
 async function caja(dbuser) {
@@ -207,7 +212,7 @@ async function caja(dbuser) {
     dbclient.addBox(dbuser._id, boxes);
     let embed = new system.embed()
         .setColor(message.member.displayColor)
-        .setDescription("Habían " + boxes + "📦 dentro de la caja (?");
+        .setDescription("There were " + boxes + "📦 inside the box (?");
     return message.channel.send({ embeds: [embed] });
 }
 
@@ -217,7 +222,7 @@ async function mini(dbuser) {
 
     let embed = new system.embed()
         .setColor(message.member.displayColor)
-        .setDescription("<@" + message.author.id + "> recibiste " + _mini + system.currency);
+        .setDescription("<@" + message.author.id + "> you got " + _mini + system.currency);
 
     return message.channel.send({ embeds: [embed] });
 }
@@ -238,7 +243,7 @@ async function normal(dbuser) {
 
     let embed = new system.embed()
         .setColor(message.member.displayColor)
-        .setDescription("<@" + message.author.id + "> recibiste " + _normal + system.currency);
+        .setDescription("<@" + message.author.id + "> you got " + _normal + system.currency);
 
     return message.channel.send({ embeds: [embed] });
 }
@@ -248,7 +253,7 @@ async function grande(dbuser) {
 
     let embed = new system.embed()
         .setColor(message.member.displayColor)
-        .setDescription("<@" + message.author.id + "> recibiste " + _grande + system.currency);
+        .setDescription("<@" + message.author.id + "> you got " + _grande + system.currency);
 
     return message.channel.send({ embeds: [embed] });
 }
@@ -265,7 +270,7 @@ async function rob(dbuser) {
 
     let embed = new system.embed()
         .setColor(message.member.displayColor)
-        .setDescription("<@" + message.author.id + "> recibiste " + `${robpct * 100}%` + system.currency + ` de mis fondos (${amount + system.currency}) :3`);
+        .setDescription("<@" + message.author.id + "> you got " + `${robpct * 100}%` + system.currency + ` off my cookies(${amount + system.currency}) :3`);
 
     return message.channel.send({ embeds: [embed] });
 }
@@ -277,7 +282,7 @@ async function pifia(dbuser) {
 
     let embed = new system.embed()
         .setColor(message.member.displayColor)
-        .setDescription("<@" + message.author.id + "> recibiste " + `-${_mini}` + system.currency + `! <:raoralaugh:1343492065954103336>`);
+        .setDescription("<@" + message.author.id + "> you got " + `-${_mini}` + system.currency + `! <:raoralaugh:1343492065954103336>`);
 
     console.log(embed, 'embed');
     return message.channel.send({ embeds: [embed] });

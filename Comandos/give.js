@@ -9,7 +9,7 @@ prototype = {
         notamount = 1;
 
         let amount = args[0];
-        if (isNaN(parseInt(amount))) { amount = args[1]; notamount-- };
+        if (isNaN(parseInt(amount))) { amount = parseInt(args[1]); --notamount };
             if (amount > dbuser.currency) return message.reply("Pobre");
 
         let target = message.mentions.users.first() || await system.findOneMember(args[notamount], message);
@@ -21,13 +21,13 @@ prototype = {
             exit = true;
             switch (e) {
                 case "A_AND_B_ARE_EQUAL":
-                    return message.reply("'tas pendejo?");
+                    return message.reply("U dum?");
                     break;
                 case "NEGATIVE":
                     return message.reply("?");
                     break;
                 case "NAN":
-                    return message.reply("'Che, cuanto le querés mandar?");
+                    return message.reply("How much fam?");
                     break;
                 default:
                     break;
@@ -37,7 +37,7 @@ prototype = {
         if (exit) return;
 		let embed = new system.embed()
 			.setColor(message.member.displayColor)
-			.setDescription("Has transferido " + ~~amount + "" + system.currency + " a <@" + target._id + ">!");
+			.setDescription("" + ~~amount + system.currency + " sent to <@" + target._id + ">!");
 
 		message.channel.send({ embeds: [embed] });
         return;
