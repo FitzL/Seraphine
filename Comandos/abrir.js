@@ -65,7 +65,7 @@ const lt_A = {
     caja: 11_00,
     pifia: 10_00,
     mini: 30_00,
-    mini_troll: 20_00,
+    mini_troll: 11_00,
     normal: 20_00,
     grande: 10_00,
     rob: 2,
