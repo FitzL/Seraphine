@@ -100,7 +100,16 @@ const LogChannel = "1359188893252981032";
 let log;
 
 client.on('ready', async () => {
-    console.log(`Logged in as ${client.user.tag}`);
+  console.log(`Logged in as ${client.user.tag}`);
+
+  console.log(client.user)
+
+  if (client.user.id != "1316479184050192384") {
+    sistema.altPrefix = "neru"
+    sistema.prefix = "n."
+  }
+
+  console.log(sistema)
   
     log = await client.channels.fetch(LogChannel);
     sistema.logChannel = log
@@ -168,10 +177,10 @@ client.on('messageCreate', async (message) => {
     client.member = await message.guild.members.fetch(client.user.id);
     let ser;
     try {
-          ser = new RegExp("<@1316479184050192384>|1316479184050192384|" + client.member.nickname.toLowerCase() + "|" + client.user.username.toLowerCase());
+      ser = new RegExp("<@" + client.user.id + ">|" + client.user.id + "|" + client.member.nickname.toLowerCase() + "|" + client.user.username.toLowerCase());
     }
     catch (e) {
-        ser = new RegExp("<@1316479184050192384>|1316479184050192384|" + client.user.username.toLowerCase())
+      ser = new RegExp("<@" + client.user.id + ">|" + client.user.id + "|" + client.user.username.toLowerCase())
     }
     
     // find message author in db
@@ -229,14 +238,14 @@ client.on('messageCreate', async (message) => {
 
     //escape if no prefix (may changed it later)
     if (messageTokens.length < 1) return; //check for empty messages
-    let primer = messageTokens[0].slice(0, prefix.length);
+    let primer = messageTokens[0].slice(0, sistema.prefix.length);
     let command;
 
-    if (primer == prefix && messageTokens[0].length > prefix.length) {
-        command = messageTokens[0].slice(prefix.length);
+    if (primer == sistema.prefix && messageTokens[0].length > sistema.prefix.length) {
+        command = messageTokens[0].slice(sistema.prefix.length);
         messageTokens.shift();
     }
-    else if (messageTokens[0].toLowerCase() == altPrefix || messageTokens[0].toLowerCase() == prefix) {
+    else if (messageTokens[0].toLowerCase() == sistema.altPrefix || messageTokens[0].toLowerCase() == sistema.prefix) {
         command = messageTokens[1];
         messageTokens.shift();
         messageTokens.shift();
@@ -368,13 +377,13 @@ client.on('messageCreate', async (message) => {
     if (message.mentions.members.first() == client.member.id && !wasMessageACommand && !message.mentions.repliedUser) {
         message.reply(
             "To use commands type `" +
-            altPrefix +
+            sistema.altPrefix +
             "` <command> o `" +
-            prefix +
+            sistema.prefix +
             "`<command>\n-# " +
-            altPrefix +
+            sistema.altPrefix +
             " p, or , " +
-            prefix +
+            sistema.prefix +
             "p. For example."
         );
     }
