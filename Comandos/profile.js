@@ -44,11 +44,11 @@ prototype = {
             .setThumbnail(discorduser.user.displayAvatarURL())
             .setTitle(discorduser.displayName)
             .addFields(
-                { name: "Dinero", value: user.currency.toString() + system.currency},
-                { name: "ingreso", value: user.pay().toString() + system.currency, inline: true },
+                { name: "Currency", value: user.currency.toString() + system.currency},
+                { name: "Income", value: user.pay().toString() + system.currency, inline: true },
                 { name: "XP", value: user.xp.toString(), inline: true },
                 { name: "Lvl", value: user.lvl.toString(), inline: true },
-                { name: "Cajas", value: user.cajas.toString() + "📦", inline: true }
+                { name: "Boxes", value: user.cajas.toString() + "📦", inline: true }
             );
         message.channel.send({ embeds: [embed]})
     }

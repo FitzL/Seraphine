@@ -186,22 +186,26 @@ client.on('messageCreate', async (message) => {
 
         console.log("couldn't find db user, making one...");
     } else {
+      try {
         message.author.dbuser = new dbUser(
-            dbuser._id.toString(),
-            dbuser.username,
-            dbuser.xp,
-            dbuser.lvl,
-            dbuser.currency,
-            dbuser.lastActivity,
-            dbuser.nextXp,
-            dbuser.nextPay,
-            dbuser.cajas,
-            dbuser.lichess,
-            dbuser.chesscom,
-            dbuser.isLichessVerified,
-            dbuser.isChesscomVerified,
-
+          dbuser._id.toString(),
+          dbuser.username,
+          dbuser.xp,
+          dbuser.lvl,
+          dbuser.currency,
+          dbuser.lastActivity,
+          dbuser.nextXp,
+          dbuser.nextPay,
+          dbuser.cajas,
+          dbuser.lichess,
+          dbuser.chesscom,
+          dbuser.isLichessVerified,
+          dbuser.isChesscomVerified,
         );
+      } catch (e) {
+        console.log(e);
+        return;
+      }
     }
 
     //user updates

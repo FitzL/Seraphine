@@ -11,21 +11,21 @@ prototype = {
         if (!message.mentions.replieduser) args.shift();
 
         if (!target) {
-            message.reply("Ni idea de quien hablas.");
+            message.reply("Donno 'em fam.");
             throw "user not found";
         };
         if (!args) {
-            return message.reply("Como chucha le pongo?");
+            return message.reply("What we calling them now bruv?");
             throw "not valid args";
         };
 
         await target.setNickname(args.join(" ")).catch(async (err) => {
-            await message.channel.send("No pude cambiarle el nombre...");
+            await message.channel.send("Can't change them name's...");
             message.delete();
             throw err;
         })
 
-        await message.channel.send("Nombre cambiado 👻");
+        await message.channel.send("Name changed 👻");
 
         message.delete();
         return;

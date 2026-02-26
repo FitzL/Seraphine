@@ -19,14 +19,14 @@ const randomWorkDelay = 3;
 const basePay = 1;
 
 class User{
-    _id;
-    username;
-    xp;
-    lvl;
-    currency;
-    lastActivity;
-    nextXp;
-    nextPay;
+  _id;
+  username;
+  xp;
+  lvl;
+  currency;
+  lastActivity;
+  nextXp;
+  nextPay;
   cajas;
   lichess;
   chesscom;
@@ -49,15 +49,15 @@ class User{
     _isChesscomVerified = false
   )
   {
-        this._id = _id;
-        this.username = _username;
+    this._id = _id;
+    this.username = _username;
 
-        this.xp = _xp;
-        this.currency = _currency;
-        this.lastActivity = _lastActivity;
-        this.lvl = this.#calculateLvl();
-        this.nextXp = _nextXp;
-        this.nextPay = _nextPay;
+    this.xp = _xp;
+    this.currency = _currency;
+    this.lastActivity = _lastActivity;
+    this.lvl = this.#calculateLvl();
+    this.nextXp = _nextXp;
+    this.nextPay = _nextPay;
     this.cajas = _cajas;
     this.lichess =_lichess;
     this.chesscom =_chesscom;
@@ -66,17 +66,17 @@ class User{
 
     }
 
-    #checkXpTimer() {
-        return this.lastActivity > this.nextXp;
-    }
+    //#checkXpTimer() {
+    //    return this.lastActivity > this.nextXp;
+    //}
 
-    #calculateXp() {
-        let gain = ~~((((Math.random() ** xpRange.bias)) * xpRange.max ) + xpRange.min);
+    //#calculateXp() {
+    //    let gain = ~~((((Math.random() ** xpRange.bias)) * xpRange.max ) + xpRange.min);
 
-        //let adjustedGain = (gain - ~~(gain * ((this.xp / 10_000) ** xpDecay)));
+    //    //let adjustedGain = (gain - ~~(gain * ((this.xp / 10_000) ** xpDecay)));
 
-        this.xp += gain;
-    }
+    //    this.xp += gain;
+    //}
 
     #calculateLvl(message, emoji) {
         if (this.lastActivity == -1) return 99;
@@ -85,62 +85,62 @@ class User{
         return lvl;
     }
 
-    #updatenextXp() {
-        this.nextXp = ( Date.now() + xpDelay + ~~((Math.random() * 2 - 1) * randomXpDelay));
-        return;
-    }
+    //#updatenextXp() {
+    //    this.nextXp = ( Date.now() + xpDelay + ~~((Math.random() * 2 - 1) * randomXpDelay));
+    //    return;
+    //}
 
-    updateXp() {
-        if (this.lastActivity == -1) return 999;
-        if(!this.#checkXpTimer()) return this.xp;
+    //updateXp() {
+    //    if (this.lastActivity == -1) return 999;
+    //    if(!this.#checkXpTimer()) return this.xp;
 
-        this.#calculateXp();
-        this.#updatenextXp();
-        return this.xp;
-    }
+    //    this.#calculateXp();
+    //    this.#updatenextXp();
+    //    return this.xp;
+    //}
 
-    updateLvl(message = null, emoji = null) {
-        if (this.lastActivity == -1) return 99;
-        this.#calculateLvl(message, emoji);
-        return this.lvl;
-    }
+    //updateLvl(message = null, emoji = null) {
+    //    if (this.lastActivity == -1) return 99;
+    //    this.#calculateLvl(message, emoji);
+    //    return this.lvl;
+    //}
 
-    #randomWorkDelay() {
-        let delay = Math.random() * 1000 * 60 * randomWorkDelay;
-        return ~~delay;
-    }
+    //#randomWorkDelay() {
+    //    let delay = Math.random() * 1000 * 60 * randomWorkDelay;
+    //    return ~~delay;
+    //}
 
-    #checkPayTime() {
-        return (this.lastActivity > this.nextPay);
-    }
+    //#checkPayTime() {
+    //    return (this.lastActivity > this.nextPay);
+    //}
 
-    #calculateIncome() {
-        if (this.lastActivity == -1) return 999;
-        this.nextPay = this.lastActivity + workingHours + this.#randomWorkDelay();
-        let pay = this.pay();
+    //#calculateIncome() {
+    //    if (this.lastActivity == -1) return 999;
+    //    this.nextPay = this.lastActivity + workingHours + this.#randomWorkDelay();
+    //    let pay = this.pay();
 
-        pay = pay < 0 ? 0 : pay;
+    //    pay = pay < 0 ? 0 : pay;
 
-        console.log(this.username, " is getting paid! ", pay);
+    //    console.log(this.username, " is getting paid! ", pay);
 
-        return pay;
-    }
+    //    return pay;
+    //}
 
     pay() {
         if (this.lastActivity == -1) return 999;
         return basePay + Math.floor(Math.min(this.currency, 5_000) / 250) + Math.floor(this.lvl/10);
     }
 
-    async updateCurrency(discordmessage = null, reaction = "🧧") {
-        if (this.lastActivity == -1) return this.currency;
-        if (!this.#checkPayTime()) {
-            return this.currency;
-        }
+    //async updateCurrency(discordmessage = null, reaction = "🧧") {
+    //    if (this.lastActivity == -1) return this.currency;
+    //    if (!this.#checkPayTime()) {
+    //        return this.currency;
+    //    }
 
-        // if (discordmessage) discordmessage.react(reaction);
-        this.currency += this.#calculateIncome(); 
-        return this.currency;
-    }
+    //    // if (discordmessage) discordmessage.react(reaction);
+    //    this.currency += this.#calculateIncome(); 
+    //    return this.currency;
+    //}
 }
 
 class mongodb {

@@ -3,7 +3,7 @@ var message;
 var system;
 var serafin;
 
-const _mini = 60;
+const _mini = 55;
 const _normal = 75;
 const _grande = 150;
 const robpct = 0.15;
@@ -30,7 +30,7 @@ prototype = {
         message = _message;
         serafin = await dbclient.findUser("1316479184050192384").catch((e) => { console.log });
 
-      if (serafin.currency < 200) return message.reply("I'm hungry rn");
+      if (serafin.currency < 200) return message.reply("I don't have enough cookies!");
 
         if (ChannelBlacklist.includes(message.channel.id)) return message.reply(
             { content: `Go to another channel.`, flags: MessageFlags.Ephemeral }

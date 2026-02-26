@@ -2,7 +2,7 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlags } = require('discord.js');
 
 prototype = {
-    alias: ["help", "h", "ayuda"], //nombre del comando
+    alias: ["help", "h", "ayuda", "commands"], //nombre del comando
     descripcion: "muestra una descripción rapida de un comando", // que hace
     costo: 0, //cuanto cuesta
     testing: false, //se está probando?
