@@ -35,8 +35,8 @@ prototype = {
 
         let embed = new system.embed()
             .setColor(client.member.displayColor)
-            .setTitle("El top de panaderos.")
-            .setFooter({ text: `Pagina ${page}/${maxPage}` })
+            .setTitle("Top bakers.")
+            .setFooter({ text: `Page ${page}/${maxPage}` })
 
         embed.setDescription(paginate(lblEntries, page, pagesize).join("\n"));
 
@@ -65,12 +65,12 @@ prototype = {
             if (i.user.id == a.mentions.repliedUser.id) {
                 if (i.customId == "-") {
                     if (page == 1) {
-                        return i.reply({ content: `Ya estás en la primera página!`, flags: MessageFlags.Ephemeral });
+                        return i.reply({ content: `Last page!`, flags: MessageFlags.Ephemeral });
                     }
                     page--;
 
                     let box = new system.embed()
-                        .setTitle("El top de panaderos.")
+                        .setTitle("Top bakers.")
                         .setColor(client.member.displayColor)
                         .setDescription(
                             paginate(lblEntries, page, pagesize).join("\n")
@@ -84,11 +84,11 @@ prototype = {
                 }
 
                 if (i.customId == "+") {
-                    if (page == maxPage) return i.reply({ content: `Ya estás en la ultima página!`, flags: MessageFlags.Ephemeral });
+                    if (page == maxPage) return i.reply({ content: `Last page!`, flags: MessageFlags.Ephemeral });
                     page++;
 
                     let box = new system.embed()
-                        .setTitle("El top de panaderos.")
+                        .setTitle("Top bakers.")
                         .setColor(client.member.displayColor)
                         .setDescription(
                             paginate(lblEntries, page, pagesize).join("\n")

@@ -6,7 +6,7 @@ prototype = { //
     help: "Elige una de varias opciones",
     testing: false,
     callback: async (args, message, client, system) => {
-      let options = args.join(" ").split(/,|\s+?or|\s+?o/g).filter(w => w.length > 0);
+      let options = args.join(" ").split(/,|\s+?or\s+|\s+?o\s+/g).filter(w => w.length > 0);
         if (options.length < 2) options = args;
         let resultado = options[~~(Math.random() * options.length)];
 

@@ -1,7 +1,7 @@
 ﻿const { Command } = require("../modulos/MCommand.js");
 
 prototype = {
-    alias: ["perfil", "p", "profile"], //nombre del comando
+    alias: ["profile", "p", "perfil"], //nombre del comando
     descripcion: "Muestra el perfil", // que hace
     costo: 0, //cuanto cuesta
     callback: async (args, message, client, system) => {

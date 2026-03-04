@@ -1,4 +1,5 @@
 ﻿const { Command } = require("../modulos/MCommand.js");
+const { mongoClient } = require('../db/db.js');
 const https = require("https");
 const lichessAPI = "https://lichess.org/api/";
 
@@ -9,9 +10,18 @@ prototype = {
   testing: false, //se está probando?
   callback: async (args, message, client, system) => {
     let a = args[0] || message.author.dbuser.lichess;
+    if (message.mentions.members.first()) {
+      let dbu = await mongoClient.findUser(message.mentions.members.first().id)
+      if (dbu.lichess !== null) {
+        a = dbu.lichess;
+      } else {
+        a = undefined;
+      }
+    }
 
     //TODO: make this show the user's lichess account
-    if (!a) return message.reply("Who am I looking for?"); 
+    if (message.mentions.members.first() && !a) return message.reply("They don't have a linked account"); 
+    else if (!a) return message.reply("Who am I looking for?"); 
 
     let user = await getUser(a);
     if (!user) return message.reply("Couldn't find them.");

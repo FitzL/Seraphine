@@ -1,16 +1,32 @@
-﻿const { mongoClient } = require("../DB/db.js");
-const { Command } = require("../modulos/MCommand.js");
+﻿const { Command } = require("../modulos/MCommand.js");
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlags } = require('discord.js');
+const { mongoClient } = require('../db/db.js');
+const { area120tables_v1alpha1 } = require("../node_modules/googleapis/build/src/index.js");
 
 const nums = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "X", "J", "Q", "k"];
-const suits = ["♥", "♦", "♣", "♠"];
+const values = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
+const suits = ["♥", "♦", "♣", "♠"]; 
+var _dbuser;
 
-const deck = suits.flatMap((s) =>
+const decka = suits.flatMap((s) =>
   nums.map((n) =>
     n + s
   )
 );
 
+const deckb = suits.flatMap((s) =>
+  nums.map((n) =>
+    n + s
+  )
+);
+
+const deckc = suits.flatMap((s) =>
+  nums.map((n) =>
+    n + s
+  )
+);
+
+const deck = [decka, deckb, deckc].flat()
 const MaxBet = 2_000;
 const MinBet = 50;
 
@@ -22,6 +38,7 @@ prototype = {
   costo: 5, //cuanto cuesta
   testing: true, //se está probando?
   callback: async (args, message, client, system) => {
+    _dbuser = await mongoClient.findUser(client.user.id).catch((e) => { console.log })
     let bet = Math.min(parseInt(args[0]) || 50, MaxBet);
 
     const board = new system.embed()
@@ -49,12 +66,12 @@ prototype = {
       collector = reply.createMessageComponentCollector({
         componentType: ComponentType.Button, time: 30_000  
       })
+      let players = [message.author.id];
 
       // handle button interactions
       collector.on('collect', (i) => {
         collector.resetTimer();
 
-        let players = [message.author.id];
 
         if (i.customId == 'start') {
           console.log("Starting game!", i.user.id);
@@ -105,6 +122,7 @@ let command = new Command(
 module.exports = command;
 
 class Game {
+  _players = [];
   players = [];
   bet;
   originalMessage;
@@ -112,61 +130,132 @@ class Game {
   currPlayer;
   dealer;
 
-  constructor(players = [], bet = 200, ogm, board) {
-    this.players = players;
+  constructor(_players = [], bet = 200, ogm, board) {
+    this._players = _players;
     this.bet = bet;
     this.originalMessage = ogm;
     this.dealer = new Dealer(this.bet);
   }
 
-  start() {
-    console.log("Game started!");
+  async start() {
     this.deck = deck;
-    shuffle(this.deck);
-    console.log(this.deck);
 
-    
+    shuffle(this.deck);
+    await this.findPlayers();
+
+    this.dealer.calculatePot(this.players.length + 1);
+    this.hit(this.dealer);
+    this.hit(this.dealer);
+
+    console.log(this.deck);
+    console.log(this.players);
+    console.log(this.dealer);
+
+    this.hit(this.players[0]);
+    this.hit(this.players[0]);
+    this.hit(this.players[0]);
+    this.hit(this.players[0]);
+    this.hit(this.players[0]);
+
+
+    console.log(this.players);
   }
 
   drawOne() {
     return this.deck.pop();
   }
+
+  hit(player = new Player()) {
+    player.addCard(this.drawOne());
+    if (!player.isBust) return;
+    console.log("you lost bruv")
+  }
+
+  async findPlayers() {
+    let i = 0;
+    for (let player of this._players) {
+      this.players[i++] = new Player(await mongoClient.findUser(player));
+    }
+  }
+
+  isDealerTurn() {
+    areAllPlayersReady = false;
+    for (let player of this.players) {
+      areAllPlayersReady = areAllPlayersReady || !player.isDone
+    }
+    return !areAllPlayersReady;
+  }
 }
 
 class Player {
+  hands = [];
   cards = [];
   dbuser;
+  isDone = false;
+  isBust = false;
 
   constructor(dbuser) {
     this.dbuser = dbuser;
   }
 
   getTotal() {
-    tot = 0;
+    let tot = 0;
+    let aces = 0;
     if (this.cards.length < 1) return tot;
-    for (card in this.cards) {
-      tot += nums.indexOf(card[0]) + 1
+    for (let card of this.cards) {
+      let numIndex = nums.indexOf(card[0]);
+      if (numIndex === 0) ++aces;
+      tot += values[numIndex];
+      console.log(card, card[0], aces)
     }
+    while (tot > 21 && aces > 0) {
+      tot -= 10;
+      --aces;
+    }
+
+    this.isBust = (tot > 21);
+    this.isDone = this.isDone || this.isBust;
+
+    console.log(tot, this.isBust, this.isDone)
     return tot;
   }
 
-  checkHand() {
-    if (this.getTotal() > 21) return false;
+  end() {
+    this.isDone = true;
+  }
+
+  stand() {
+    this.isDone();
+  }
+
+  split() {
+    this.hands = [...cards];
+  }
+
+  addCard(card) {
+    this.cards.push(card);
+    this.getTotal();
+  }
+
+  clearCards() {
+    this.cards = 0;
+    this.isDone = false;
+    this.isBust = false;
   }
 }
 
 class Dealer extends Player{
   pot = 0;
-  dbuser;
+  ;
 
   constructor(bet) {
-    this.dbuser = mongoClient.client;
+    super(_dbuser);
     this.betSize = bet;
-    this.pot = this.calculatePot();
+    this.pot = 0;
   }
 
-  calculatePot(players = []) {
-    return players.length
+  calculatePot(i) {
+    this.pot = i * this.betSize;
   }
 }
 

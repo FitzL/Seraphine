@@ -28,7 +28,7 @@ prototype = {
         system = _system
         dbclient = system.mongoclient;
         message = _message;
-        serafin = await dbclient.findUser("1316479184050192384").catch((e) => { console.log });
+        serafin = await dbclient.findUser(client.user.id).catch((e) => { console.log });
 
       if (serafin.currency < 200) return message.reply("I don't have enough cookies!");
 
