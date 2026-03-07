@@ -1,7 +1,6 @@
 ﻿const { Command } = require("../modulos/MCommand.js");
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlags } = require('discord.js');
 const { mongoClient } = require('../db/db.js');
-const { area120tables_v1alpha1 } = require("../node_modules/googleapis/build/src/index.js");
 
 const nums = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "X", "J", "Q", "k"];
 const values = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]

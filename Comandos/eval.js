@@ -1,4 +1,5 @@
 ﻿const { Command } = require("../modulos/MCommand.js");
+const { mongoClient } = require('../db/db.js');
 
 prototype = {
 	alias: ["sudo", "eval"],

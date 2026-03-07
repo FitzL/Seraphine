@@ -26,7 +26,7 @@ const client = new Client({
 });
 
 const { ownerid, token, botadmins } = require('./secret.json');
-const { dbUser, mongoClient } = require('./db/db.js');
+const { dbUser, mongoClient, Timer } = require('./db/db.js');
 const { channel } = require('diagnostics_channel');
 let comandos = [];
 let tiempoDesdeUltimoComando = Date.now();
@@ -42,8 +42,7 @@ let rechazos = [
 
 let cocks = [
   "girlcockx",
-  "fxtwitter",
-  "hitlerx"
+  "fxtwitter"
 ]
 
 let rejectChance = 0.03;
@@ -98,7 +97,7 @@ const lichessGame = new RegExp(
   "(?:https:/.+?lichess\..+?/)([a-z0-9]+)(?:/)(.+)(?:#[0-9]+)" +
   "|(?:https:/.+?lichess\..+?/)([a-z0-9]+)(?:/)?", "gmi");
 
-const xitter = /(https:\/.?)(x)(\..+\/.+\/status\/.+)\?|(https:\/.?)(twitter)(\..+\/.+\/status\/.+)\?/gm;
+const xitter = /(https:\/.?)(x)(\..+\/.+\/status\/.+)(\??)|(https:\/.?)(twitter)(\..+\/.+\/status\/.+)(\??)/gm;
 
 // const { REST, Routes} = require('discord.js');
 // const rest = new REST({ version: '10' }).setToken(token);
@@ -154,6 +153,25 @@ client.on('ready', async () => {
     sistema.currency = sistema.serafin.serverCurrency;
     sistema.lockdown = sistema.serafin.lockdown;
   });
+
+  //handle timers
+
+  // infinite loop, should run once a second
+  while (true) {
+    await sleep(1000);
+    let timers = await mongoClient.getAllTimers();
+
+    for (let timer of timers) {
+      let time = timer.createdAt + timer.duration * 1000 - Date.now();
+      if (time < 0) {
+        await mongoClient.deleteTimer(timer._id)
+        let timerChannel = await client.channels.cache.get(timer.channelId);
+        await timerChannel.send(`Time's up <@${timer.owner}>!` + timer.message);
+
+        console.log("time's up!", timerChannel.id)
+      }
+    }
+  }
 })
 
 client.on('interactionCreate', async interaction => {
@@ -340,8 +358,8 @@ client.on('messageCreate', async (message) => {
               case "RECHAZO":
                 message.reply(rechazos[~~(Math.random() * rechazos)])
                 break;
+              case "DEFERED":
               case "USER_NOT_FOUND":
-                console.log(e);
                 break;
               default:
                 message.channel.send({
@@ -357,7 +375,7 @@ client.on('messageCreate', async (message) => {
                 .setColor(client.member.displayColor)
                 .setDescription("+" + commandOptions.costo + sistema.currency + " to me.")
 
-              //await mongoClient.transferCurrency(message.author.id, client.user.id, commandOptions.costo); //taxes
+              await mongoClient.transferCurrency(message.author.id, client.user.id, commandOptions.costo); //taxes
               message.channel.send({
                 embeds: [embed]
               });
@@ -552,4 +570,8 @@ function GirlCock(msg) {
   let groups = [...msg.matchAll(xitter)].flat().filter(n => n !== undefined);
   console.log(groups);
   return groups[1] + cocks[~~(Math.random() * cocks.length)] + groups[3];
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
 }

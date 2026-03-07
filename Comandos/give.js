@@ -10,10 +10,10 @@ prototype = {
 
         let amount = args[0];
         if (isNaN(parseInt(amount))) { amount = parseInt(args[1]); --notamount };
-            if (amount > dbuser.currency) return message.reply("Pobre");
+            if (amount > dbuser.currency) return message.reply("Broke ahh");
 
         let target = message.mentions.users.first() || await system.findOneMember(args[notamount], message);
-            if (!target) return message.reply("Y a quien se lo mando?");
+            if (!target) return message.reply("To who?");
         target = await system.mongoclient.findUser(target.id);
             
         await system.mongoclient.transferCurrency(dbuser._id, target._id, amount).catch((e) => {
