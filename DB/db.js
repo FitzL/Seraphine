@@ -283,6 +283,7 @@ class Timer {
   createdAt;
   duration;
   message;
+  handled = false;
   constructor(
     _owner,
     _channelId,

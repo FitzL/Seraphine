@@ -158,17 +158,21 @@ client.on('ready', async () => {
 
   // infinite loop, should run once a second
   while (true) {
-    await sleep(5_000);
+    await sleep(2_500);
     let timers = await mongoClient.getAllTimers();
 
     for (let timer of timers) {
       let time = timer.createdAt + timer.duration * 1000 - Date.now();
+      if (timer.handled) continue;
       if (time < 0) {
-        await mongoClient.deleteTimer(timer._id)
+        timer.handled = true;
+        await mongoClient.deleteTimer(timer._id);
         let timerChannel = client.channels.cache.get(timer.channelId);
         await timerChannel.send(`Time's up <@${timer.owner}>!` + timer.message);
 
         console.log("time's up!", timerChannel.id)
+      } else {
+        console.log("waiting for", timer.message)
       }
     }
   }

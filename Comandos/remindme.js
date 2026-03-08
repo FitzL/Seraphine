@@ -33,7 +33,7 @@ prototype = {
 
     if (totaltime == 0) totaltime = parseInt(time) * 60;
     if (isNaN(totaltime) || totaltime == 0) {
-      meessage.reply("Not a valid time :p");
+      message.reply("Not a valid time :p");
       throw "DEFERED";
     }
 
