@@ -158,7 +158,6 @@ client.on('ready', async () => {
 
   // infinite loop, should run once a second
   while (true) {
-    await sleep(1_000);
     let timers = await mongoClient.getAllTimers();
 
     for (let timer of timers) {
@@ -173,6 +172,7 @@ client.on('ready', async () => {
         console.log("time's up!", timerChannel.id)
       } 
     }
+    await sleep(1_000);
   }
 })
 
