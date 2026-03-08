@@ -49,7 +49,7 @@ prototype = {
 
     await mongoClient.insertTimer(timer);
 
-    message.reply("Timer set, I will ping you on this channel. :3")
+    message.reply("Timer set for <t:" +  ~~((Date.now() + totaltime ) / 1000) + ">!\nI will ping you on this channel. :3")
 
   }
 }
