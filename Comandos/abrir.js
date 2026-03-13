@@ -4,9 +4,10 @@ var system;
 var serafin;
 
 const _mini = 55;
-const _normal = 75;
-const _grande = 150;
+const _normal = 70;
+const _grande = 120;
 const robpct = 0.15;
+const _bigL = 0.75;
 
 const { Command } = require("../modulos/MCommand.js");
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlags } = require('discord.js');
@@ -69,6 +70,7 @@ const lt_A = {
   normal: 20_00,
   grande: 10_00,
   rob: 2,
+  bigL: 50
 }
 
 let loottable = ProbabilityFromObject(lt_A);
@@ -130,6 +132,10 @@ async function singleOpen() {
     case 'pifia':
       await pifia(message.author.dbuser)
         .catch((e) => { console.log; return });
+
+    case 'bigL':
+      await bigL(message.author.dbuser)
+        .catch((e) => { console.log; return });
       break;
   }
   return;
@@ -143,9 +149,10 @@ async function multiOpen(dbuser, amount) {
   let totalBoxes = 0;
   var lotoMoney = ~~(serafin.currency * robpct);
   var loto = false;
+  let luhmao = false;
 
-  while (amount-- && serafin.currency > 0) {
-    if (amount < 0) break;
+  while (!luhmao && !loto && --amount && serafin.currency > 0 ) {
+    if (amount < 1) break;
     let rndnumber = ~~(Math.random() * 100_000) / 1_000;
     let prize = "";
 
@@ -181,6 +188,12 @@ async function multiOpen(dbuser, amount) {
         loto = true;
         totalCurrency += lotoMoney;
         break;
+
+      case 'bigL':
+        totalCurrency -= Math.max(~~(dbuser.currency * _bigL), 1);
+        luhmao = true;
+        break;
+
       case 'pifia':
         totalCurrency -= _mini;
         break;
@@ -188,19 +201,28 @@ async function multiOpen(dbuser, amount) {
   };
   let opening = "There were ";
   let closing = "inside. ";
-  let lototxt = "AND YOU WON THE LOTERRY!"
+  let lototxt = "AND YOU WON THE LOTERRY!";
+  let bigltxt = "AND YOU GOT A BIG L!"
 
-  console.log(totalCurrency, totalBoxes)
+  console.log(totalCurrency, totalBoxes, amount)
   let embed = new system.embed()
     .setColor(message.member.displayColor)
     .setDescription(opening + totalCurrency + system.currency + " and " + totalBoxes + "📦 ");
 
   if (totalBoxes == 0) embed.setDescription(opening + totalCurrency + system.currency);
 
-  if (loto == true) embed.setDescription(opening + totalCurrency + system.currency + " and " + totalBoxes + "📦 " + closing + lototxt);;
+  if (loto == true) embed.setDescription(opening + totalCurrency + system.currency + " and " + totalBoxes + "📦 " + closing + lototxt);
+  if (luhmao == true) embed.setDescription(opening + totalCurrency + system.currency + " and " + totalBoxes + "📦 " + closing + bigltxt);
 
-  dbclient.addBox(dbuser._id, totalBoxes);
-  dbclient.transferCurrency(serafin._id, dbuser._id, totalCurrency);
+  dbclient.addBox(dbuser._id, totalBoxes + amount);
+
+  dbclient.transferCurrency(serafin._id, dbuser._id, totalCurrency).catch((err) => {
+    console.log(err)
+    if (err == "NEGATIVE") {
+      dbclient.transferCurrency(dbuser._id, serafin._id, -totalCurrency)
+    }
+  })
+  
 
   return await message.channel.send({ embeds: [embed] });
 }
@@ -248,6 +270,19 @@ async function normal(dbuser) {
 
   return message.channel.send({ embeds: [embed] });
 }
+
+async function bigL(dbuser, defer = false) {
+  if (!defer) await dbclient.addBox(dbuser._id, -1).catch((e) => { console.log; throw "NO_BOXES" });
+  console.log("Takinga away this much: " + Math.max(~~(dbuser.currency * _bigL), 1));
+  dbclient.transferCurrency(dbuser._id, serafin._id, Math.max(~~(dbuser.currency * _bigL), 1));
+
+  let embed = new system.embed()
+    .setColor(message.member.displayColor)
+    .setDescription("<@" + message.author.id + "> you got -" + Math.max(~~(dbuser.currency * _bigL), 1) + system.currency);
+
+  return message.channel.send({ embeds: [embed] });
+}
+
 async function grande(dbuser) {
   await dbclient.addBox(dbuser._id, -1).catch((e) => { console.log; throw "NO_BOXES" });
   dbclient.transferCurrency(serafin._id, dbuser._id, _grande);

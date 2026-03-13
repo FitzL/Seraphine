@@ -26,7 +26,7 @@ const client = new Client({
 });
 
 const { ownerid, token, botadmins } = require('./secret.json');
-const { dbUser, mongoClient, Timer } = require('./db/db.js');
+const { dbUser, mongoClient, Timer, Effect } = require('./db/db.js');
 const { channel } = require('diagnostics_channel');
 let comandos = [];
 let tiempoDesdeUltimoComando = Date.now();
@@ -97,7 +97,7 @@ const lichessGame = new RegExp(
   "(?:https:/.+?lichess\..+?/)([a-z0-9]+)(?:/)(.+)(?:#[0-9]+)" +
   "|(?:https:/.+?lichess\..+?/)([a-z0-9]+)(?:/)?", "gmi");
 
-const xitter = /(https:\/.?)(x)(\..+\/.+\/status\/.+)(\??)|(https:\/.?)(twitter)(\..+\/.+\/status\/.+)(\??)/gm;
+const xitter = /(https:\/.?)(x)(\..+\/.+\/status\/.+)(\??)\s|(https:\/.?)(twitter)(\..+\/.+\/status\/.+)(\??)\s/gm;
 
 // const { REST, Routes} = require('discord.js');
 // const rest = new REST({ version: '10' }).setToken(token);
@@ -225,21 +225,7 @@ client.on('messageCreate', async (message) => {
     console.log("couldn't find db user, making one...");
   } else {
     try {
-      message.author.dbuser = new dbUser(
-        dbuser._id.toString(),
-        dbuser.username,
-        dbuser.xp,
-        dbuser.lvl,
-        dbuser.currency,
-        dbuser.lastActivity,
-        dbuser.nextXp,
-        dbuser.nextPay,
-        dbuser.cajas,
-        dbuser.lichess,
-        dbuser.chesscom,
-        dbuser.isLichessVerified,
-        dbuser.isChesscomVerified,
-      );
+      message.author.dbuser = dbuser;
     } catch (e) {
       console.log(e);
       return;
@@ -254,6 +240,22 @@ client.on('messageCreate', async (message) => {
   //if (message.author.id == "469661223764361216") await handleKyuUpdates(message.author.dbuser, message).then(async (_update) => { update = _update });
   //else await handleUserUpdates(message.author.dbuser, message).then(async (_update) => { update = _update });
   //message.author.dbuser = update.user;
+
+  //do effects if available
+
+  let effects = await message.author.dbuser.getEffects();
+
+  for (let effect of effects) {
+    if (effect.checkTime()) {
+      mongoClient.deleteEffect(effect._id);
+      continue;
+    }
+    try {
+      effect.react(message);
+    } catch (err) {
+      console.log
+    }
+  }
 
   if (message.author.bot) return;
 
@@ -303,7 +305,7 @@ client.on('messageCreate', async (message) => {
 
       //limit who can mess with wip commands
       if (commandOptions.testing && (!botadmins.includes(message.author.id))) {
-        message.reply("No, Fuck you.");
+        message.reply("No, you're not allowed.");
         message.channel.send("<:ayweno:1167952675158110308>");
         return;
       }

@@ -21,6 +21,8 @@ class mongodb {
   client;
   db;
   users;
+  timers;
+  effects;
 
   constructor() {
     try {
@@ -35,6 +37,7 @@ class mongodb {
       this.db = this.client.db(dbname);
       this.users = this.db.collection('users');
       this.timers = this.db.collection('timers');
+      this.effects = this.db.collection('effects');
     }
   }
 
@@ -58,9 +61,17 @@ class mongodb {
     return this.timers.find({}).toArray();
   }
 
-  async insertTimer(timer) {
-    if (!timer || timer == null) return;
-    this.timers.insertOne(timer);
+  async getAllEffects() {
+    let effects = await this.effects.find({}).toArray();
+
+    return effects.map((e) => new Effect(
+      e.target, e.emoji, e.duration, e.createdAt, e._id
+    ))
+  }
+
+  async insertEffect(effect) {
+    if (!effect || effect == null) return;
+    this.effects.insertOne(effect);
   }
 
   async deleteTimer(timer) {
@@ -68,9 +79,36 @@ class mongodb {
     return;
   }
 
+  async deleteEffect(effect) {
+    this.effects.deleteOne(effect._id);
+    return;
+  }
+
+  async getUserEffects(dbuser) {
+    //TODO: REMOVE?
+  }
+
   async findUser(userid) {
     let user = await this.users.findOne({ _id: userid });
     if (!user) throw "USER_NOT_FOUND";
+
+    return new User(
+      user._id,
+      user.username,
+      user.xd,
+      user.lvl,
+      user.currency,
+      user.lastActivity,
+      user.nextXp,
+      user.nextPay,
+      user.cajas,
+      user.lichess,
+      user.chesscom,
+      user.isLichessVerified,
+      user.isChesscomVerified,
+      user.serverCurrency
+    )
+
     return user;
   }
 
@@ -166,6 +204,7 @@ class User {
   chesscom;
   isLichessVerified;
   isChesscomVerified;
+  serverCurrency;
 
   constructor(
     _id,
@@ -180,7 +219,8 @@ class User {
     _lichess = null,
     _chesscom = null,
     _isLichessVerified = false,
-    _isChesscomVerified = false
+    _isChesscomVerified = false,
+    _serverCurrency = null
   ) {
     this._id = _id;
     this.username = _username;
@@ -196,6 +236,7 @@ class User {
     this.chesscom = _chesscom;
     this.isLichessVerified = _isLichessVerified;
     this.isChesscomVerified = _isChesscomVerified;
+    this.serverCurrency = _serverCurrency;
 
   }
 
@@ -269,11 +310,16 @@ class User {
   //    if (!this.#checkPayTime()) {
   //        return this.currency;
   //    }
-
+  
   //    // if (discordmessage) discordmessage.react(reaction);
-  //    this.currency += this.#calculateIncome(); 
+  //    this.currency += this.#calculateIncome();
   //    return this.currency;
   //}
+
+  async getEffects() {
+    let effects = await db.getAllEffects();
+    return effects.filter(effect => effect.target == this._id);
+  }
 }
 
 class Timer {
@@ -307,8 +353,50 @@ class Timer {
   }
 }
 
+class Effect {
+  _id;
+  target;
+  emoji;
+  duration;
+  createdAt;
+  constructor(
+    _target,
+    _emoji,
+    _duration,
+    _createdAt,
+    id
+  ) {
+    this.target = _target;
+    this.emoji = _emoji;
+    this.duration = _duration;
+    this.createdAt = _createdAt;
+    this._id = id;
+  }
 
+  react(message) {
+    if (!message) throw "NOT VALID MESSAGE";
+    try {
+      message.react(this.emoji)
+    } catch (err) {
+      console.log(err);
+      throw "NOT VALID MESSAGE";
+    }
+  }
+
+  async getTarget() {
+    return await db.findUser(target);
+  }
+
+  checkTime() {
+    return (this.duration * 1_000 + this.createdAt) < Date.now(); 
+  }
+
+  checkRemainingTime() {
+    return ~~(((this.duration * 1_000 + this.createdAt) - Date.now()) / 1000)
+  }
+};
 
 module.exports.mongoClient = db;
 module.exports.dbUser = User;
 module.exports.Timer = Timer;
+module.exports.Effect = Effect;
