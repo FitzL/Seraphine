@@ -2,7 +2,7 @@
 const { dbUser, mongoClient, Timer, Effect } = require('../db/db.js');
 
 prototype = {
-  alias: ["tomato"], //nombre del comando
+  alias: ["tomato", "tomate", "boo"], //nombre del comando
   descripcion: "*throw a tomato at someone*", // que hace
   costo: 30, //cuanto cuesta
   testing: false, //se está probando?

@@ -248,6 +248,7 @@ client.on('messageCreate', async (message) => {
   for (let effect of effects) {
     if (effect.checkTime()) {
       mongoClient.deleteEffect(effect._id);
+      message.reply("I ran out of " + effect.emoji + "'s for you.");
       continue;
     }
     try {

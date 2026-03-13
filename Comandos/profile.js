@@ -13,22 +13,12 @@ prototype = {
     if (target) {
       try {
         user = await system.mongoclient.findUser(target.id);
-        user = new system.dbuser(
-          user._id.toString(),
-          user.username,
-          user.xp,
-          user.lvl,
-          user.currency,
-          user.lastActivity,
-          user.nextXp,
-          user.nextPay,
-          user.cajas,
-        );
+
       }
       catch (e) {
         console.log(e);
         let dbuser = new system.dbuser(target.id, target.displayName);
-        await system.mongoclient.insertUser(dbuser);
+        //await system.mongoclient.insertUser(dbuser);
         user = dbuser;
 
         console.log(dbuser);
