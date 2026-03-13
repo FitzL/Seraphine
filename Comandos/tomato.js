@@ -4,7 +4,7 @@ const { dbUser, mongoClient, Timer, Effect } = require('../db/db.js');
 prototype = {
   alias: ["tomato"], //nombre del comando
   descripcion: "*throw a tomato at someone*", // que hace
-  costo: 1, //cuanto cuesta
+  costo: 30, //cuanto cuesta
   testing: false, //se está probando?
   callback: async (args, message, client, system) => {
     let id = args.shift();
