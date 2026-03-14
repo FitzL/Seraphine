@@ -95,7 +95,7 @@ class mongodb {
     return new User(
       user._id,
       user.username,
-      user.xd,
+      user.xp,
       user.lvl,
       user.currency,
       user.lastActivity,
@@ -138,7 +138,7 @@ class mongodb {
 
     if (isNaN(amount)) throw "NAN";
 
-    if (amount < 1) throw "NEGATIVE";
+    if (amount < 0) throw "NEGATIVE";
 
     if (!alice || !bob) throw "USER_NOT_FOUND";
     if (amount > alice.currency) throw "BROKE";

@@ -69,8 +69,8 @@ const lt_A = {
   mini_troll: 11_00,
   normal: 20_00,
   grande: 10_00,
-  rob: 2,
-  bigL: 50
+  rob: 20,
+  bigL: 40
 }
 
 let loottable = ProbabilityFromObject(lt_A);

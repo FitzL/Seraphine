@@ -26,6 +26,7 @@ prototype = {
       discorduser = target;
     }
 
+    console.log(user)
 
     let embed = new system.embed()
       .setColor(discorduser.displayColor)
