@@ -132,6 +132,7 @@ async function singleOpen() {
     case 'pifia':
       await pifia(message.author.dbuser)
         .catch((e) => { console.log; return });
+      break;
 
     case 'bigL':
       await bigL(message.author.dbuser)
