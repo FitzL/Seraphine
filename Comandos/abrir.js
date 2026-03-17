@@ -6,7 +6,7 @@ var serafin;
 const _mini = 55;
 const _normal = 70;
 const _grande = 120;
-const robpct = 0.15;
+const robpct = 0.30;
 const _bigL = 0.75;
 
 const { Command } = require("../modulos/MCommand.js");
