@@ -69,14 +69,19 @@ class mongodb {
     ))
   }
 
-  async insertEffect(effect) {
-    if (!effect || effect == null) return;
-    this.effects.insertOne(effect);
+  async insertTimer(timer) {
+    if (!timer || timer == null) return;
+    this.timers.insertOne(timer);
   }
 
   async deleteTimer(timer) {
     this.timers.deleteOne(timer._id);
     return;
+  }
+
+  async insertEffect(effect) {
+    if (!effect || effect == null) return;
+    this.effects.insertOne(effect);
   }
 
   async deleteEffect(effect) {

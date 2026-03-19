@@ -202,7 +202,7 @@ async function multiOpen(dbuser, amount) {
   };
   let opening = "There were ";
   let closing = "inside. ";
-  let lototxt = "AND YOU WON THE LOTERRY!";
+  let lototxt = "AND YOU WON THE LOTRERY!";
   let bigltxt = "AND YOU GOT A BIG L!"
 
   console.log(totalCurrency, totalBoxes, amount)
@@ -257,7 +257,7 @@ async function mini_troll(dbuser) {
 
   let embed = new system.embed()
     .setColor(message.member.displayColor)
-    .setDescription("<@" + message.author.id + "> chu!");
+    .setDescription("<@" + message.author.id + "> go away!");
 
   return message.channel.send({ embeds: [embed] });
 }
