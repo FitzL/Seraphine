@@ -3,12 +3,12 @@ const { mongoClient } = require('../db/db.js');
 
 prototype = {
 	alias: ["sudo", "eval"],
-	descripcion: "Corre codigo arbitrario",
+	descripcion: "Run any code",
 	testing: true,
 	costo: 0,
 	callback: async (args, message, client, system) => {
 		if (system.onwerid != message.author.id) {
-			message.reply("Por ahora solo fitz puede tocar esto, sry");
+			message.reply("Only fitz");
 			return;
 		}
 
@@ -27,6 +27,7 @@ prototype = {
 let command = new Command(
 	prototype.alias,
 	prototype.descripcion,
+	prototype.help,
 	prototype.costo,
 	prototype.testing,
 	prototype.callback,

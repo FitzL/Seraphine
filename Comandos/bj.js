@@ -34,6 +34,7 @@ const defaultBoardMessage = "Press start to play!";
 prototype = {
   alias: ["bj"], //nombre del comando
   descripcion: "Black Jack", // que hace
+  help: "BJ Miku alone or with \~Friends\~",
   costo: 5, //cuanto cuesta
   testing: true, //se está probando?
   callback: async (args, message, client, system) => {
@@ -112,6 +113,7 @@ prototype = {
 let command = new Command(
   prototype.alias,
   prototype.descripcion,
+  prototype.help,
   prototype.costo,
   prototype.testing,
   prototype.callback,

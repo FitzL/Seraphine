@@ -2,7 +2,7 @@
 
 prototype = {
   alias: ["profile", "p", "perfil"], //nombre del comando
-  descripcion: "Muestra el perfil", // que hace
+  descripcion: "Pull up a profile, your or anyone's", // que hace
   costo: 0, //cuanto cuesta
   callback: async (args, message, client, system) => {
     let user = message.author.dbuser;
@@ -46,6 +46,7 @@ prototype = {
 let command = new Command(
   prototype.alias,
   prototype.descripcion,
+  prototype.help,
   prototype.costo,
   prototype.testing,
   prototype.callback,

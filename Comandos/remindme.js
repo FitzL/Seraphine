@@ -3,11 +3,11 @@ const { mongoClient, Timer } = require('../db/db.js');
 
 prototype = {
   alias: ["remind", "setreminder", "reminder", "recuerdame", "recuerda"], //nombre del comando
-  descripcion: "set a reeminder", // que hace
+  descripcion: "Set a reeminder", // que hace
   costo: 5, //cuanto cuesta
   testing: false, //se está probando?
   callback: async (args, message, client, system) => {
-    let timeregex = /(\d+)\s*(h|m|s)/gi;
+    let timeregex = /(\d+)\s*(d|h|m|s)/gi;
     let time = args.shift(1);
 
     let totaltime = 0;
@@ -16,6 +16,9 @@ prototype = {
       console.log(match)
       if (isNaN(match[1])) continue;
       switch (match[2]) {
+        case "d":
+          totaltime += match[1] * 60 * 60 * 24;
+          break;
         case "h":
           totaltime += match[1] * 60 * 60;
           break;
@@ -57,6 +60,7 @@ prototype = {
 let command = new Command(
   prototype.alias,
   prototype.descripcion,
+  prototype.help,
   prototype.costo,
   prototype.testing,
   prototype.callback,

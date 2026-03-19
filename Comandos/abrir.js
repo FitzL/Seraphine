@@ -19,7 +19,8 @@ const ChannelBlacklist =
   ]
 prototype = {
   alias: ["abrir", "box", "open", "caja", "ouvrir"], //nombre del comando
-  descripcion: "Abre una o mas cajas.", // que hace
+  descripcion: "Open one or more boxes.", // que hace
+  help: "Basically the only legal way of getting a lot of cookies. There's a small chance of losing almost all your cookies - be careful.",
   costo: 0, //cuanto cuesta
   testing: false, //se está probando?
   cantidad: 1,
@@ -56,6 +57,7 @@ prototype = {
 let command = new Command(
   prototype.alias,
   prototype.descripcion,
+  prototype.help,
   prototype.costo,
   prototype.testing,
   prototype.callback,

@@ -3,7 +3,8 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlag
 
 prototype = {
   alias: ["help", "h", "ayuda", "commands"], //nombre del comando
-  descripcion: "muestra una descripción rapida de un comando", // que hace
+  descripcion: "Should show you important info about commands", // que hace
+  help: "Get descriptions of a command or commands and see their other aliases",
   costo: 0, //cuanto cuesta
   testing: false, //se está probando?
   callback: async (args, message, client, system) => {
@@ -24,10 +25,13 @@ prototype = {
         descripcion: c.descripcion || "Ask the dev",
         costo: c.costo
       });
+
+
       if (target) {
         if (c.alias.some(a => a === target.toLowerCase())) targetHelp = {
           alias: c.alias,
           descripcion: c.descripcion || "Ask the dev",
+          help: c.help || c.descripcion || "Ask the dev",
           costo: c.costo
         };
       }
@@ -66,8 +70,8 @@ prototype = {
     if (target) {
       box.setTitle("About: `" + target.toLowerCase() + "`")
       box.setDescription(
-        "About: `" + targetHelp.alias.join("`, `") + "`\n" +
-        targetHelp.descripcion);
+        "Aliases: `" + targetHelp.alias.join("`, `") + "`\n" +
+        targetHelp.help);
       box.setFooter({ text: null })
     };
 
@@ -157,6 +161,7 @@ prototype = {
 let command = new Command(
   prototype.alias,
   prototype.descripcion,
+  prototype.help,
   prototype.costo,
   prototype.testing,
   prototype.callback,

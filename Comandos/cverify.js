@@ -5,7 +5,8 @@ const decimals = 1;
 
 prototype = {
   alias: ["cverify", "cv"], //nombre del comando
-  descripcion: "Pull up a chesscom profile", // que hace
+  descripcion: "Verify your account!", // que hace
+  help: "Verifies that the accounts belongs to you",
   costo: 1, //cuanto cuesta
   testing: false, //se está probando?
   callback: async (args, message, client, system) => {
@@ -64,6 +65,7 @@ async function getUser(username) {
 let command = new Command(
   prototype.alias,
   prototype.descripcion,
+  prototype.help,
   prototype.costo,
   prototype.testing,
   prototype.callback,

@@ -2,7 +2,7 @@
 
 prototype = {
     alias: ["lolcd", "cooldown"], //nombre del comando
-    descripcion: "", // que hace
+    descripcion: "League cooldown calculator", // que hace
     costo: 0,
     callback: async (args, message, client, system) => {
         let cd = args[0];
@@ -20,12 +20,13 @@ prototype = {
 }
 
 let command = new Command(
-    prototype.alias,
-    prototype.descripcion,
-    prototype.costo,
-    prototype.testing,
-    prototype.callback,
-    prototype.init
+  prototype.alias,
+  prototype.descripcion,
+  prototype.help,
+  prototype.costo,
+  prototype.testing,
+  prototype.callback,
+  prototype.init
 )
 
 module.exports = command;

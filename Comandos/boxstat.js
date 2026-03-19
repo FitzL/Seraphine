@@ -11,12 +11,13 @@ prototype = {
 }
 
 let command = new Command(
-    prototype.alias,
-    prototype.descripcion,
-    prototype.costo,
-    prototype.testing,
-    prototype.callback,
-    prototype.init
+  prototype.alias,
+  prototype.descripcion,
+  prototype.help,
+  prototype.costo,
+  prototype.testing,
+  prototype.callback,
+  prototype.init
 )
 
 module.exports = command;

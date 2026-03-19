@@ -5,7 +5,8 @@ const lichessAPI = "https://lichess.org/api/";
 
 prototype = {
   alias: ["lichess", "l"], //nombre del comando
-  descripcion: "", // que hace
+  descripcion: "See someone's lichess rating", // que hace
+  help: "See the ratings and a vague indicator of progess of anyone",
   costo: 0, //cuanto cuesta
   testing: false, //se está probando?
   callback: async (args, message, client, system) => {
@@ -110,6 +111,7 @@ async function getUser(username) {
 let command = new Command(
   prototype.alias,
   prototype.descripcion,
+  prototype.help,
   prototype.costo,
   prototype.testing,
   prototype.callback,

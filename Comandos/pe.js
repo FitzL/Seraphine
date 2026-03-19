@@ -2,7 +2,7 @@
 
 prototype = {
     alias: ["pe"], //nombre del comando
-    descripcion: "???", // que hace
+    descripcion: "peruano", // que hace
     costo: 0, //cuanto cuesta
     testing: false, //se está probando?
     callback: async (args, message, client, system) => {
@@ -12,12 +12,13 @@ prototype = {
 }
 
 let command = new Command(
-    prototype.alias,
-    prototype.descripcion,
-    prototype.costo,
-    prototype.testing,
-    prototype.callback,
-    prototype.init
+  prototype.alias,
+  prototype.descripcion,
+  prototype.help,
+  prototype.costo,
+  prototype.testing,
+  prototype.callback,
+  prototype.init
 )
 
 module.exports = command;

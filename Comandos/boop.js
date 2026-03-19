@@ -3,6 +3,7 @@
 prototype = {
   alias: ["boop"], //nombre del comando
   descripcion: "*boop*", // que hace
+  help: "*boop*",
   costo: 1, //cuanto cuesta
   testing: false, //se está probando?
   callback: async (args, message, client, system) => {
@@ -23,6 +24,7 @@ prototype = {
 let command = new Command(
   prototype.alias,
   prototype.descripcion,
+  prototype.help,
   prototype.costo,
   prototype.testing,
   prototype.callback,

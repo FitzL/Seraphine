@@ -6,12 +6,23 @@ const decimals = 1;
 prototype = {
   alias: ["chesscom", "chesscum", "cc", "c"], //nombre del comando
   descripcion: "Pull up a chesscom profile", // que hace
+  help: "Get statistics about a chess.com profile. You can also get someone's profile if they have their's linked",
   costo: 1, //cuanto cuesta
   testing: false, //se está probando?
   callback: async (args, message, client, system) => {
-    let a = args[0] || message.author.dbuser.chesscom;
+    let a = args[0] || message.author.dbuser.lichess;
+    if (message.mentions.members.first()) {
+      let dbu = await mongoClient.findUser(message.mentions.members.first().id)
+      if (dbu.lichess !== null) {
+        a = dbu.lichess;
+      } else {
+        a = undefined;
+      }
+    }
 
-    if (!a) return message.reply("Who we looking for?");
+    //TODO: make this show the user's lichess account
+    if (message.mentions.members.first() && !a) return message.reply("They don't have a linked account");
+    else if (!a) return message.reply("Who am I looking for?"); 
 
     let user = await getUser(a);
     if (!user) return message.reply("Couldn't find them fam");
@@ -131,6 +142,7 @@ async function getUserRatings(username) {
 let command = new Command(
   prototype.alias,
   prototype.descripcion,
+  prototype.help,
   prototype.costo,
   prototype.testing,
   prototype.callback,
