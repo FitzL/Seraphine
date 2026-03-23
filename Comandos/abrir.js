@@ -4,10 +4,10 @@ var system;
 var serafin;
 
 const _mini = 55;
-const _normal = 70;
+const _normal = 80;
 const _grande = 120;
-const robpct = 0.30;
-const _bigL = 0.75;
+const robpct = 0.175;
+const _bigL = 0.50;
 
 const { Command } = require("../modulos/MCommand.js");
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlags } = require('discord.js');
@@ -65,12 +65,12 @@ let command = new Command(
 )
 
 const lt_A = {
-  caja: 11_00,
-  pifia: 10_00,
+  caja: 10_00,
+  pifia: 9_00,
   mini: 30_00,
-  mini_troll: 11_00,
+  mini_troll: 10_00,
   normal: 20_00,
-  grande: 10_00,
+  grande: 15_00,
   rob: 20,
   bigL: 40
 }
@@ -167,7 +167,7 @@ async function multiOpen(dbuser, amount) {
 
     switch (prize) {
       case 'caja':
-        totalBoxes += ~~(Math.random() * 3) + 1;
+        totalBoxes += ~~(Math.random() * 4) + 1;
         break;
       case 'mini':
         totalCurrency += _mini;
@@ -234,7 +234,7 @@ async function multiOpen(dbuser, amount) {
 async function caja(dbuser) {
   await dbclient.addBox(dbuser._id, -1).catch((e) => { console.log; throw "NO_BOXES" });
 
-  let boxes = ~~(Math.random() * 3) + 1;
+  let boxes = ~~(Math.random() * 4) + 1;
   dbclient.addBox(dbuser._id, boxes);
   let embed = new system.embed()
     .setColor(message.member.displayColor)

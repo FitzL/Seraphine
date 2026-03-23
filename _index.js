@@ -555,13 +555,33 @@ function sanitise(str) {
 }
 
 async function bumpReward(dbuserid, _message) {
-  await mongoClient.addBox(dbuserid, 1).catch((e) => {
-    console.log
-  });
-  await _message.react("1️⃣")
-  await _message.react("📦")
-  return;
-}
+  switch (~~(Math.random() * 3)) {
+    case 0:
+      await mongoClient.addBox(dbuserid, 1).catch((e) => {
+        console.log
+      });
+
+      await _message.react("1️⃣")
+      await _message.react("📦")
+      break;
+    case 1:
+      await mongoClient.addBox(dbuserid, 2).catch((e) => {
+        console.log
+      });
+
+      await _message.react("2️⃣")
+      await _message.react("📦")
+      break;
+
+    case 2:
+      await mongoClient.addBox(dbuserid, 3).catch((e) => {
+        console.log
+      });
+
+      await _message.react("3️⃣")
+      await _message.react("📦")
+      break;
+}}
 
 function LichessGiffer(msg) {
   let groups = [...msg.matchAll(lichessGame)].flat().filter(n => n !== undefined);
