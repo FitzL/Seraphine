@@ -259,7 +259,7 @@ class User {
 
   #calculateLvl(message, emoji) {
     if (this.lastActivity == -1) return 99;
-    let lvl = ~~(((Math.log(this.xp / 2) + 1) / Math.log(1.5))) + 1;
+    let lvl = Math.max(~~((Math.Log(this.xp / 2) + 1) / Math.log(1.25)) + 1, 0);
     // if (lvl != this.lvl && message) message.react(emoji)
     return lvl;
   }
