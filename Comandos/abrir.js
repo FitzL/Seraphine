@@ -71,7 +71,7 @@ const lt_A = {
   mini_troll: 10_00,
   normal: 20_00,
   grande: 15_00,
-  rob: 20,
+  rob: 25,
   bigL: 40
 }
 
@@ -173,7 +173,7 @@ async function multiOpen(dbuser, amount) {
         totalCurrency += _mini;
         break;
       case 'mini_troll':
-        totalCurrency += _mini;
+        totalBoxes += 1;
         break;
       case 'normal':
         totalCurrency += _normal;

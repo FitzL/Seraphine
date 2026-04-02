@@ -73,6 +73,7 @@ let sereneRechazos = [
 var message;
 const prefix = "m.";
 const altPrefix = "miku";
+var cachedUser = [];
 
 var sistema = {
   ultimoPersonaje: ultimoPersonaje,
@@ -110,18 +111,18 @@ const LogChannel = "1359188893252981032";
 let log;
 
 client.on('guildMemberAdd', async () => {
-  console.log("joined");
+  //console.log("joined");
 
 })
 
 client.on('guildMemberRemove', async (member) => {
   const joinedAt = member.joinedAt;
 
-  if (!joinedAt) return console.log('No join date available');
+  if (!joinedAt) return //console.log('No join date available');
 
   const timeInServer = Date.now() - joinedAt.getTime();
 
-  console.log(timeInServer/1000 + " seconds in server");
+ // console.log(timeInServer/1000 + " seconds in server");
 })
 
 client.once('ready', async () => {
@@ -625,7 +626,7 @@ async function findOneMember(keyword, message) {
       }
     )
   })
-
+  /*
   console.log(keyword)
   users.forEach((u) => {
     console.log(
@@ -635,6 +636,7 @@ async function findOneMember(keyword, message) {
       u.displayName.match(new RegExp(keyword, "i")), u.displayName
     )
   })
+  */
 
   let primerMatch;
 
