@@ -12,7 +12,8 @@ const {
   ButtonBuilder,
   ButtonStyle,
   ComponentType,
-  MessageFlags
+  MessageFlags,
+  SlashCommandBuilder
 } = require('discord.js');
 
 const client = new Client({
@@ -97,17 +98,33 @@ const lichessGame = new RegExp(
   "(?:https:/.+?lichess\..+?/)([a-z0-9]+)(?:/)(.+)(?:#[0-9]+)" +
   "|(?:https:/.+?lichess\..+?/)([a-z0-9]+)(?:/)?", "gmi");
 
-const xitter = /(https:\/.?)(x)(\..+\/.+\/status\/.+)(\??)\s|(https:\/.?)(twitter)(\..+\/.+\/status\/.+)(\??)\s/gm;
+const xitter = /(https:\/.?)(x)(\..+\/.+\/status\/.+)(\?)?\s|(https:\/.?)(twitter)(\..+\/.+\/status\/.+)(\?)?\s/gm;
 
-// const { REST, Routes} = require('discord.js');
-// const rest = new REST({ version: '10' }).setToken(token);
+const { REST, Routes} = require('discord.js');
+const rest = new REST({ version: '10' }).setToken(token);
 
 let commands = [];
+let slashCommands = [];
 
 const LogChannel = "1359188893252981032";
 let log;
 
-client.on('ready', async () => {
+client.on('guildMemberAdd', async () => {
+  console.log("joined");
+
+})
+
+client.on('guildMemberRemove', async (member) => {
+  const joinedAt = member.joinedAt;
+
+  if (!joinedAt) return console.log('No join date available');
+
+  const timeInServer = Date.now() - joinedAt.getTime();
+
+  console.log(timeInServer/1000 + " seconds in server");
+})
+
+client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}`);
 
   console.log(client.user)
@@ -173,11 +190,159 @@ client.on('ready', async () => {
       } 
     }
     await sleep(1_000);
+
+    // slash commands
+    await comandos.forEach(c => {
+      slashCommands.push(
+        new SlashCommandBuilder()
+          .setName(c.alias[0])
+          .setDescription(c.help.slice(0, 100) || "ask the dev")
+          .addStringOption(o => 
+            o
+              .setName('text')
+              .setDescription('description')
+          )
+      )
+    })
+
+    slashCommands.map(c => c.toJSON())
+
+    try {
+      await rest.put(
+        //Routes.applicationGuildCommands(client.user.id, "1125975138987429908"), // uncomment for dev
+        Routes.applicationCommands(client.user.id),
+        { body: slashCommands }
+      )
+    } catch (e) {
+      console.log
+    }
+
+    console.log()
   }
 })
 
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
+
+  return interaction.reply("this is under wip.");
+
+  let command = interaction.commandName;
+  let args = interaction.options.getString('text');
+
+  args = sanitise(args).split(/\s+/);
+
+  return console.log(interaction)
+
+  for (const commandOptions of comandos) {
+    if (command.toLowerCase() != command) continue;
+
+    let cobrar = false;
+
+    for (const _alias of commandOptions.alias) {
+      //limit who can mess with wip commands
+      if (commandOptions.testing && (!botadmins.includes(message.author.id))) {
+        message.reply("No, you're not allowed.");
+        message.channel.send("<:ayweno:1167952675158110308>");
+        return;
+      }
+
+      // command cooldown
+      if (((message.createdTimestamp - tiempoDesdeUltimoComando)) < 1_250) {
+        return message.reply("Dame un segundo.").then(m => { setTimeout(() => { m.delete() }, 3_500) });
+      }
+
+      try {
+        // run preparations de command may need
+
+        // defunct, for now
+
+        /*
+        messageTokens = await commandOptions.init(messageTokens, message, client, sistema).catch(e => {
+                console.log(e);
+                return;
+            }) || messageTokens;
+        */
+
+        //reject commands randomly!
+        if (Math.random() < rejectChance) {
+          message.channel.send(rejections[~~(Math.random() * rejections.length)]);
+          throw "REJECTED"
+        }
+
+        //manage commands with a price
+        if (commandOptions.costo > 0) cobrar = true;
+        //if (isNaN(message.author.dbuser.currency) == true) return message.reply("<@443966554078707723> hiciste algo mal, pendejo. Alguien tiene NaN" + sistema.currency);
+        if (cobrar && !commandOptions.checkCosto(message.author.dbuser)) {
+          message.channel.send("I don't listen to poor people.").then(m => {
+            message.channel.send("<:raoralaugh:1343492065954103336>");
+            setTimeout(() => {
+              message.reply("I'd do it for " + commandOptions.costo + sistema.currency + " tho :3");
+            }, 3_000);
+          });
+
+          throw "NOT_ENOUGH_FUNDS";
+        }
+
+        // run command callback, may return a reply to the user
+        await commandOptions.callback(messageTokens, interaction, client, sistema)
+          .catch(e => {
+            console.log(e);
+            cobrar = false;
+
+            switch (e) {
+              case "PIFIA":
+                if (message.author.id == "702283061298987089") return message.reply(sereneRechazos[~~(Math.random() * rechazos)])
+                message.reply(rechazos[~~(Math.random() * rechazos)])
+                break;
+              case "RECHAZO":
+                message.reply(rechazos[~~(Math.random() * rechazos)])
+                break;
+              case "DEFERED":
+              case "USER_NOT_FOUND":
+                break;
+              default:
+                message.channel.send({
+                  content: "There has been an error! You can report it with: `" + sistema.altPrefix + " report <problem>` so the dev can ignore you.",
+                  flags: MessageFlags.Ephimeral
+                })
+            }
+          })
+          .then(async () => {
+            // actually take the fee
+            if (cobrar) {
+              let embed = new EmbedBuilder()
+                .setColor(client.member.displayColor)
+                .setDescription("+" + commandOptions.costo + sistema.currency + " to me.")
+
+              await mongoClient.transferCurrency(message.author.id, client.user.id, commandOptions.costo); //taxes
+              message.channel.send({
+                embeds: [embed]
+              });
+
+              let logEmbed = new EmbedBuilder()
+                .setColor(client.member.displayColor)
+                .setDescription(
+                  commandOptions.costo + sistema.currency +
+                  `\n<@${message.author.id}> usó \`${_alias}\``
+                )
+
+              log.send(
+                {
+                  embeds: [logEmbed]
+                }
+              )
+            }
+          });
+        //if (reply) message.reply(reply);
+      } catch (err) {
+        console.log(err);
+      }
+
+      //update last commando counter
+      tiempoDesdeUltimoComando = Date.now();
+      break;
+    }
+  }
 })
 
 client.on('messageCreate', async (message) => {
@@ -312,7 +477,7 @@ client.on('messageCreate', async (message) => {
       }
 
       // command cooldown
-      if (((message.createdTimestamp - tiempoDesdeUltimoComando)) < 2_500) {
+      if (((message.createdTimestamp - tiempoDesdeUltimoComando)) < 1_250) {
         return message.reply("Dame un segundo.").then(m => { setTimeout(() => { m.delete() }, 3_500) });
       }
 
@@ -432,7 +597,8 @@ client.login(token);
 // get a member from id
 async function getMember(id, message) {
   if (!id) return null;
-  let member = message.guild.members.fetch(id).catch((err) => { console.log });
+
+  let member = message.guild.members.cache.get(id).catch((err) => { console.log });
 
   return member;
 }
@@ -442,28 +608,52 @@ async function findOneMember(keyword, message) {
   if (!keyword || keyword === undefined) return undefined;
   keyword = await keyword.toLowerCase();
 
-  let guildMembers = Array.from(await message.guild.members.fetch());
+  let guildMembers = cachedUsers;
+  if (guildMembers.length < 1) {
+    guildMembers = Array.from(message.guild.members.cache);
+    cachedUsers = guildMembers;
+  }
   let users = [];
 
   guildMembers.forEach((member, id) => {
     users.push(
       {
         id: member[1].id,
-        username: member[1].user.username ?? "",
-        nickname: member[1].user.globalName ?? "",
-        displayName: member[1].displayName ?? "",
+        username: member[1].user.username ?? "xox",
+        nickname: member[1].user.globalName ?? "xox",
+        displayName: member[1].displayName ?? "xox",
       }
     )
   })
 
-  let primerMatch = null;
+  console.log(keyword)
+  users.forEach((u) => {
+    console.log(
+      u.id.match(new RegExp(keyword, "i")), u.id,
+      u.nickname.match(new RegExp(keyword, "i")), u.nickname,
+      u.username.match(new RegExp(keyword, "i")), u.username,
+      u.displayName.match(new RegExp(keyword, "i")), u.displayName
+    )
+  })
+
+  let primerMatch;
 
   users.forEach(async (user) => {
-    if (user.id.match(keyword) || (user.nickname && user.nickname.toLowerCase().match(keyword)) || user.username.toLowerCase().match(keyword) || user.displayName.toLowerCase().match(keyword)) {
+    if (
+      u.id.match(new RegExp(keyword, "i")) ||
+      u.nickname.match(new RegExp(keyword, "i")) ||
+      u.username.match(new RegExp(keyword, "i")) ||
+      u.displayName.match(new RegExp(keyword, "i")) 
+    ) {
       primerMatch = user.id;
       return;
     }
   })
+
+  if (!primerMatch) {
+    cachedUsers = [];
+  }
+
   return await getMember(primerMatch, message);
 }
 

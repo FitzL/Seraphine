@@ -7,7 +7,7 @@ prototype = {
   costo: 5, //cuanto cuesta
   testing: false, //se está probando?
   callback: async (args, message, client, system) => {
-    let timeregex = /(\d+)\s*(d|h|m|s)/gi;
+    let timeregex = /(\d+)\s*(y|d|h|m|s)/gi;
     let time = args.shift(1);
 
     let totaltime = 0;
@@ -16,6 +16,9 @@ prototype = {
       console.log(match)
       if (isNaN(match[1])) continue;
       switch (match[2]) {
+        case "y":
+          totaltime += match[1] * 60 * 60 * 24 * 365;
+          break;
         case "d":
           totaltime += match[1] * 60 * 60 * 24;
           break;
