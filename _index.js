@@ -369,7 +369,7 @@ client.on('messageCreate', async (message) => {
   //console.log(`${message.author.username} @` + messageDate.getHours().toString().padStart(2, "0") + ":" + messageDate.getMinutes().toString().padStart(2, "0"));
 
   // find bot member object in server
-  client.member = await message.guild.members.fetch(client.user.id);
+  client.member = await message.guild.cache.members.get(client.user.id);
   let ser;
   try {
     ser = new RegExp("<@" + client.user.id + ">|" + client.user.id + "|" + client.member.nickname.toLowerCase() + "|" + client.user.username.toLowerCase());
@@ -640,14 +640,14 @@ async function findOneMember(keyword, message) {
 
   let primerMatch;
 
-  users.forEach(async (user) => {
+  users.forEach(async (u) => {
     if (
       u.id.match(new RegExp(keyword, "i")) ||
       u.nickname.match(new RegExp(keyword, "i")) ||
       u.username.match(new RegExp(keyword, "i")) ||
       u.displayName.match(new RegExp(keyword, "i")) 
     ) {
-      primerMatch = user.id;
+      primerMatch = u.id;
       return;
     }
   })
