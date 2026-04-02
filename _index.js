@@ -73,7 +73,7 @@ let sereneRechazos = [
 var message;
 const prefix = "m.";
 const altPrefix = "miku";
-var cachedUser = [];
+var cachedUsers = [];
 
 var sistema = {
   ultimoPersonaje: ultimoPersonaje,
