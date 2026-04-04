@@ -15,7 +15,8 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlag
 const ChannelBlacklist =
   [
     "1126988705513619516",
-    "1465094200839373024"
+    "1465094200839373024",
+    "1386148543269572722"
   ]
 prototype = {
   alias: ["abrir", "box", "open", "caja", "ouvrir"], //nombre del comando
