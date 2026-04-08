@@ -101,7 +101,7 @@ const lichessGame = new RegExp(
 
 const xitter = /(https:\/.?)(x)(\..+\/.+\/status\/.+)(\?)?\s|(https:\/.?)(twitter)(\..+\/.+\/status\/.+)(\?)?\s/gm;
 
-const { REST, Routes} = require('discord.js');
+const { REST, Routes } = require('discord.js');
 const rest = new REST({ version: '10' }).setToken(token);
 
 let commands = [];
@@ -122,7 +122,7 @@ client.on('guildMemberRemove', async (member) => {
 
   const timeInServer = Date.now() - joinedAt.getTime();
 
- // console.log(timeInServer/1000 + " seconds in server");
+  // console.log(timeInServer/1000 + " seconds in server");
 })
 
 client.once('ready', async () => {
@@ -180,45 +180,82 @@ client.once('ready', async () => {
 
     for (let timer of timers) {
       let time = timer.createdAt + timer.duration * 1000 - Date.now();
+
       if (timer.handled) continue;
+
       if (time < 0) {
+        if (timer.channelId == -1) {
+          // TAXES
+          console.log("nom nom");
+
+          await mongoClient.updateTimer(timer._id, "createdAt", Date.now());
+
+          let taxPercent = timer.owner;
+          let taxMinimum = timer.message;
+
+          let taxableUsers = await mongoClient.users.find({
+            _id: {
+              '$ne': client.user.id,
+            },
+            currency: {
+              '$gt': taxMinimum,
+            }
+          }).sort({
+            currency: -1,
+          }).toArray();
+
+          let totalTaxIncome = 0;
+
+          for (let user of taxableUsers) {
+            let taxAmount = ~~(user.currency * taxPercent) + taxMinimum;
+
+            console.log("" + taxAmount + " from " + user.username);
+            totalTaxIncome += taxAmount;
+
+            mongoClient.transferCurrency(user._id, serafin.id, taxAmount);
+          }
+
+          console.log("Miku gets: " + totalTaxIncome)
+
+          continue;
+        }
+
         timer.handled = true;
+        await mongoClient.updateTimer(timer._id, "createdAt", Date.now());
         await mongoClient.deleteTimer(timer._id);
         let timerChannel = client.channels.cache.get(timer.channelId);
         await timerChannel.send(`Time's up <@${timer.owner}>!` + timer.message);
 
         console.log("time's up!", timerChannel.id)
-      } 
+      }
     }
-    await sleep(1_000);
+    await sleep(5_000);
+  }
 
-    // slash commands
-    await comandos.forEach(c => {
-      slashCommands.push(
-        new SlashCommandBuilder()
-          .setName(c.alias[0])
-          .setDescription(c.help.slice(0, 100) || "ask the dev")
-          .addStringOption(o => 
-            o
-              .setName('text')
-              .setDescription('description')
-          )
-      )
-    })
+  // slash commands
+  await comandos.forEach(c => {
+    slashCommands.push(
+      new SlashCommandBuilder()
+        .setName(c.alias[0])
+        .setDescription(c.help.slice(0, 100) || "ask the dev")
+        .addStringOption(o =>
+          o
+            .setName('text')
+            .setDescription('description')
+        )
+    )
+  })
 
-    slashCommands.map(c => c.toJSON())
+  slashCommands.map(c => c.toJSON())
 
-    try {
-      await rest.put(
-        //Routes.applicationGuildCommands(client.user.id, "1125975138987429908"), // uncomment for dev
-        Routes.applicationCommands(client.user.id),
-        { body: slashCommands }
-      )
-    } catch (e) {
-      console.log
-    }
-
-    console.log()
+  try {
+    await rest.put(
+      //Routes.applicationGuildCommands(client.user.id, "1125975138987429908"), // uncomment for dev
+      Routes.applicationCommands(client.user.id),
+      { body: slashCommands }
+    )
+  } catch (e) {
+    console.log
   }
 })
 
@@ -413,7 +450,7 @@ client.on('messageCreate', async (message) => {
 
   for (let effect of effects) {
     if (effect.checkTime()) {
-      mongoClient.deleteEffect(effect._id);
+      await mongoClient.deleteEffect(effect._id);
       message.reply("I ran out of " + effect.emoji + "'s for you.");
       continue;
     }
@@ -645,7 +682,7 @@ async function findOneMember(keyword, message) {
       u.id.match(new RegExp(keyword, "i")) ||
       u.nickname.match(new RegExp(keyword, "i")) ||
       u.username.match(new RegExp(keyword, "i")) ||
-      u.displayName.match(new RegExp(keyword, "i")) 
+      u.displayName.match(new RegExp(keyword, "i"))
     ) {
       primerMatch = u.id;
       return;
@@ -773,7 +810,8 @@ async function bumpReward(dbuserid, _message) {
       await _message.react("3️⃣")
       await _message.react("📦")
       break;
-}}
+  }
+}
 
 function LichessGiffer(msg) {
   let groups = [...msg.matchAll(lichessGame)].flat().filter(n => n !== undefined);

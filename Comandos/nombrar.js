@@ -12,20 +12,21 @@ prototype = {
 
     if (!target) {
       message.reply("Donno 'em fam.");
-      throw "user not found";
+      throw "DEFERED";
     };
+
     if (!args) {
       return message.reply("What we calling them now bruv?");
-      throw "not valid args";
+      throw "DEFERED";
     };
 
     await target.setNickname(args.join(" ")).catch(async (err) => {
-      await message.channel.send("Can't change them name's...");
+      await message.channel.send("Can't change their name's...");
       message.delete();
       throw err;
     })
 
-    await message.channel.send("Name changed 👻");
+    message.channel.send("Name changed 👻");
 
     message.delete();
     return;

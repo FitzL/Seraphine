@@ -79,6 +79,12 @@ class mongodb {
     return;
   }
 
+  async updateTimer(id, field, content) {
+    if (!field || !id) throw "MISSING_FIELD_OR_ID";
+
+    this.timers.updateOne({ _id: id }, { $set: { [field]: content } })
+  }
+
   async insertEffect(effect) {
     if (!effect || effect == null) return;
     this.effects.insertOne(effect);
