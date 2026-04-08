@@ -212,7 +212,7 @@ client.once('ready', async () => {
             console.log("" + taxAmount + " from " + user.username);
             totalTaxIncome += taxAmount;
 
-            mongoClient.transferCurrency(user._id, sistema.serafin.id, taxAmount);
+            mongoClient.transferCurrency(user._id, sistema.serafin._id, taxAmount);
           }
 
           console.log("Miku gets: " + totalTaxIncome)
