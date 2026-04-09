@@ -9,6 +9,19 @@ const _grande = 120;
 const robpct = 0.175;
 const _bigL = 0.50;
 
+const lt_A = {
+  caja: 10_000,
+  pifia: 9_000,
+  mini: 30_000,
+  mini_troll: 10_000,
+  normal: 20_000,
+  grande: 15_000,
+  rob: 27,
+  bigL: 35
+}
+
+let loottable = ProbabilityFromObject(lt_A);
+
 const { Command } = require("../modulos/MCommand.js");
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, MessageFlags } = require('discord.js');
 
@@ -65,18 +78,7 @@ let command = new Command(
   prototype.init
 )
 
-const lt_A = {
-  caja: 10_00,
-  pifia: 9_00,
-  mini: 30_00,
-  mini_troll: 10_00,
-  normal: 20_00,
-  grande: 15_00,
-  rob: 25,
-  bigL: 40
-}
 
-let loottable = ProbabilityFromObject(lt_A);
 
 // turn loottable into probabilities
 function ProbabilityFromObject(obj) {
