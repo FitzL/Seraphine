@@ -103,24 +103,11 @@ class mongodb {
     let user = await this.users.findOne({ _id: userid });
     if (!user) throw "USER_NOT_FOUND";
 
-    return new User(
-      user._id,
-      user.username,
-      user.xp,
-      user.lvl,
-      user.currency,
-      user.lastActivity,
-      user.nextXp,
-      user.nextPay,
-      user.cajas,
-      user.lichess,
-      user.chesscom,
-      user.isLichessVerified,
-      user.isChesscomVerified,
-      user.serverCurrency
-    )
+    let test = new User();
 
-    return user;
+    Object.assign(test, user);
+
+    return test
   }
 
   async insertUser(user) {

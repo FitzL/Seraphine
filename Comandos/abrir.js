@@ -157,7 +157,7 @@ async function multiOpen(dbuser, amount) {
   var loto = false;
   let luhmao = false;
 
-  while (!luhmao && !loto && --amount && serafin.currency > 0 ) {
+  while (!luhmao && !loto && --amount && (serafin.currency - totalCurrency) > 0 ) {
     if (amount < 1) break;
     let rndnumber = ~~(Math.random() * 100_000) / 1_000;
     let prize = "";
