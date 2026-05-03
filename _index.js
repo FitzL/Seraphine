@@ -110,9 +110,13 @@ let slashCommands = [];
 const LogChannel = "1359188893252981032";
 let log;
 
-client.on('guildMemberAdd', async () => {
+client.on('guildMemberAdd', async (member) => {
   //console.log("joined");
-
+  try {
+    if (member.guild.id == "1125975138987429908") { member.roles.add(member.guild.roles.cache.get("1352288803431251988")) };
+  } catch (e) {
+    console.error(e)
+  }
 })
 
 client.on('guildMemberRemove', async (member) => {
@@ -177,6 +181,7 @@ client.once('ready', async () => {
   // infinite loop, should run once a second
   while (true) {
     let timers = await mongoClient.getAllTimers();
+    timers.filter(obj => obj.handled);
 
     for (let timer of timers) {
       let time = timer.createdAt + timer.duration * 1000 - Date.now();
@@ -189,6 +194,16 @@ client.once('ready', async () => {
           console.log("nom nom");
 
           await mongoClient.updateTimer(timer._id, "createdAt", Date.now());
+
+          /*
+            Tax {
+              owner: taxPercent,
+              channelId: -1,
+              createdAt: lastTax,
+              message: taxMinimum,
+              duration: Date()
+            }
+          */
 
           let taxPercent = timer.owner;
           let taxMinimum = timer.message;
@@ -207,26 +222,29 @@ client.once('ready', async () => {
           let totalTaxIncome = 0;
 
           for (let user of taxableUsers) {
-            let taxAmount = ~~(user.currency * taxPercent) + taxMinimum;
+            let taxAmount = ~~(user.currency * taxPercent);
 
             console.log("" + taxAmount + " from " + user.username);
             totalTaxIncome += taxAmount;
 
-            mongoClient.transferCurrency(user._id, sistema.serafin._id, taxAmount);
+            await mongoClient.transferCurrency(user._id, sistema.serafin._id, taxAmount);
           }
 
-          console.log("Miku gets: " + totalTaxIncome)
+          log.send("Miku gets: " + totalTaxIncome)
 
           continue;
         }
 
-        timer.handled = true;
+        await mongoClient.timers.findOneAndUpdate(
+          { _id: timer._id},
+          { $set: { handled: true } }
+        );
         await mongoClient.updateTimer(timer._id, "createdAt", Date.now());
         await mongoClient.deleteTimer(timer._id);
         let timerChannel = client.channels.cache.get(timer.channelId);
-        await timerChannel.send(`Time's up <@${timer.owner}>!` + timer.message);
+        await timerChannel.send(`Time's up <@${timer.owner}>!` + (timer.message || "\nForgot to leave a message fam <:angrydog:1127627394283491358>"));
 
-        console.log("time's up!", timerChannel.id)
+        log.send("time's up in " + "<#" + timer.channelId + "> for <@" + timer.owner + ">!")
       }
     }
     await sleep(5_000);
@@ -414,7 +432,7 @@ client.on('messageCreate', async (message) => {
   catch (e) {
     ser = new RegExp("<@" + client.user.id + ">|" + client.user.id + "|" + client.user.username.toLowerCase())
   }
-
+  
   // find message author in db
   let dbuser = await mongoClient.findUser(message.author.id).catch((e) => { console.log; console.log("user not found", message.author.id) });
 
@@ -422,8 +440,8 @@ client.on('messageCreate', async (message) => {
   if (!mongoClient.findUser(message.author.id).catch((e) => { console.log })) {
     return;
     dbuser = new dbUser(message.author.id, message.author.username);
-    mongoClient.insertUser(dbuser);
-    message.author.dbuser = dbuser;
+    await mongoClient.insertUser(dbuser);
+    message.author.dbuser = mongoClient.findUser(message.author.id);
 
     console.log("couldn't find db user, making one...");
   } else {
@@ -445,7 +463,6 @@ client.on('messageCreate', async (message) => {
   //message.author.dbuser = update.user;
 
   //do effects if available
-
   let effects = await message.author.dbuser.getEffects();
 
   for (let effect of effects) {
