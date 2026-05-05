@@ -179,13 +179,16 @@ client.once('ready', async () => {
   //handle timers
 
   // infinite loop, should run once a second
-  while (true) {
+  outer: while (true) {
     let timers = await mongoClient.getAllTimers();
 
     for (let timer of timers) {
       let time = timer.createdAt + timer.duration * 1000 - Date.now();
 
-      if (timer.handled) await mongoClient.deleteTimer(timer._id);
+      if (timer.handled) {
+        await mongoClient.deleteTimer(timer._id);
+        continue outer;
+      }
 
       if (time < 0) {
         if (timer.channelId == -1) {
@@ -231,7 +234,7 @@ client.once('ready', async () => {
 
           await log.send("Miku gets: " + totalTaxIncome)
 
-          continue;
+          continue outer;
         }
 
         await mongoClient.timers.findOneAndUpdate(
