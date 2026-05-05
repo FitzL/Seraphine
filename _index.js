@@ -181,17 +181,16 @@ client.once('ready', async () => {
   // infinite loop, should run once a second
   while (true) {
     let timers = await mongoClient.getAllTimers();
-    timers.filter(obj => obj.handled);
 
     for (let timer of timers) {
       let time = timer.createdAt + timer.duration * 1000 - Date.now();
 
-      if (timer.handled) continue;
+      if (timer.handled) await mongoClient.deleteTimer(timer._id);
 
       if (time < 0) {
         if (timer.channelId == -1) {
           // TAXES
-          console.log("nom nom");
+          log.send("nom nom");
 
           await mongoClient.updateTimer(timer._id, "createdAt", Date.now());
 
@@ -230,7 +229,7 @@ client.once('ready', async () => {
             await mongoClient.transferCurrency(user._id, sistema.serafin._id, taxAmount);
           }
 
-          log.send("Miku gets: " + totalTaxIncome)
+          await log.send("Miku gets: " + totalTaxIncome)
 
           continue;
         }
@@ -240,14 +239,13 @@ client.once('ready', async () => {
           { $set: { handled: true } }
         );
         await mongoClient.updateTimer(timer._id, "createdAt", Date.now());
-        await mongoClient.deleteTimer(timer._id);
         let timerChannel = client.channels.cache.get(timer.channelId);
         await timerChannel.send(`Time's up <@${timer.owner}>!` + (timer.message || "\nForgot to leave a message fam <:angrydog:1127627394283491358>"));
 
         log.send("time's up in " + "<#" + timer.channelId + "> for <@" + timer.owner + ">!")
       }
     }
-    await sleep(5_000);
+    await sleep(10_000);
   }
 
   // slash commands
