@@ -10,11 +10,11 @@ prototype = {
   costo: 1, //cuanto cuesta
   testing: false, //se está probando?
   callback: async (args, message, client, system) => {
-    let a = args[0] || message.author.dbuser.lichess;
+    let a = args[0] || message.author.dbuser.chesscom;
     if (message.mentions.members.first()) {
       let dbu = await mongoClient.findUser(message.mentions.members.first().id)
-      if (dbu.lichess !== null) {
-        a = dbu.lichess;
+      if (dbu.chesscom !== null) {
+        a = dbu.chesscom;
       } else {
         a = undefined;
       }
