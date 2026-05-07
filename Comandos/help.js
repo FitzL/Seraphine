@@ -55,7 +55,7 @@ prototype = {
     //message.reply(availableCommands.join("\n"))
     //return;
 
-    maxPage += ~~(availableCommands.length / pagesize)
+    maxPage += ~~((availableCommands.length - 1) / pagesize)
     if (availableCommands % pagesize == 0) maxPage--
     console.log(maxPage);
 
