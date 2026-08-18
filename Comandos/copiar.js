@@ -8,7 +8,7 @@ prototype = {
   test: true,
   callback: async (args, message, client, system) => {
     let id = args[0];
-    let target = message.mentions.members.first() || await system.findOneMember(id, args[0]);
+    let target = message.mentions.members.first() || await system.findOneMember(id, message);
     console.log(target);
 
     if (!message.mentions.replieduser) args.shift();
