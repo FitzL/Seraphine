@@ -31,7 +31,7 @@ prototype = {
       );
     });
 
-    maxPage += ~~(lblEntries.length / pagesize);
+    maxPage += ~~(lblEntries.length - 1 / pagesize);
     if (lblEntries.length % pagesize == 0) maxPage--;
 
     let embed = new system.embed()
