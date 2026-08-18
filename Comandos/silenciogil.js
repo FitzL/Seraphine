@@ -14,7 +14,7 @@ prototype = {
 
     if (!target) {
       message.reply("Idk that guy");
-      throw "user not found";
+      throw "DEFERED";
     };
 
     if (target.id == client.user.id) {
@@ -28,7 +28,7 @@ prototype = {
       await target.timeout(15_000, 'kyc').catch(async (err) => {
         await message.channel.send("no?");
         //message.delete();
-        throw err;
+        throw "DEFERED";
       })
 
       await message.channel.send("<@" + target.id + "> used `shush`, but it backfired...");
@@ -40,7 +40,7 @@ prototype = {
     await target.timeout(30_000, 'kyc').catch(async (err) => {
       await message.channel.send("I can't silence them");
       //message.delete();
-      throw err;
+      throw "DEFERED";
     })
 
     await message.channel.send("Shut up <@" + target.id + ">");

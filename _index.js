@@ -186,6 +186,16 @@ client.once('ready', async () => {
       let time = timer.createdAt + timer.duration * 1000 - Date.now();
 
       if (timer.handled) {
+        console.log(
+          "Deleting timer",
+          timer._id,
+          "handled:",
+          timer.handled,
+          "owner:",
+          timer.owner,
+          "channel:",
+          timer.channelId
+        );
         await mongoClient.deleteTimer(timer._id);
         continue outer;
       }
@@ -205,6 +215,15 @@ client.once('ready', async () => {
               message: taxMinimum,
               duration: Date()
             }
+
+              //ejemplo:
+{
+                "owner": 0.05,
+                "channelId": -1,
+                "createdAt": 0,
+                "message": 500,
+                "duration": 86400
+              }
           */
 
           let taxPercent = timer.owner;
@@ -661,57 +680,30 @@ async function getMember(id, message) {
 
 // get a member from a string
 async function findOneMember(keyword, message) {
-  if (!keyword || keyword === undefined) return undefined;
-  keyword = await keyword.toLowerCase();
+  if (!keyword) return undefined;
+
+  keyword = keyword.toLowerCase();
 
   let guildMembers = cachedUsers;
-  if (guildMembers.length < 1) {
-    guildMembers = Array.from(message.guild.members.cache);
+
+  if (guildMembers.length === 0) {
+    guildMembers = [...message.guild.members.cache.values()];
     cachedUsers = guildMembers;
   }
-  let users = [];
 
-  guildMembers.forEach((member, id) => {
-    users.push(
-      {
-        id: member[1].id,
-        username: member[1].user.username ?? "xox",
-        nickname: member[1].user.globalName ?? "xox",
-        displayName: member[1].displayName ?? "xox",
-      }
-    )
-  })
-  /*
-  console.log(keyword)
-  users.forEach((u) => {
-    console.log(
-      u.id.match(new RegExp(keyword, "i")), u.id,
-      u.nickname.match(new RegExp(keyword, "i")), u.nickname,
-      u.username.match(new RegExp(keyword, "i")), u.username,
-      u.displayName.match(new RegExp(keyword, "i")), u.displayName
-    )
-  })
-  */
+  const match = guildMembers.find(member =>
+    member.id.includes(keyword) ||
+    member.user.username?.toLowerCase().includes(keyword) ||
+    member.user.globalName?.toLowerCase().includes(keyword) ||
+    member.displayName?.toLowerCase().includes(keyword)
+  );
 
-  let primerMatch;
-
-  users.forEach(async (u) => {
-    if (
-      u.id.match(new RegExp(keyword, "i")) ||
-      u.nickname.match(new RegExp(keyword, "i")) ||
-      u.username.match(new RegExp(keyword, "i")) ||
-      u.displayName.match(new RegExp(keyword, "i"))
-    ) {
-      primerMatch = u.id;
-      return;
-    }
-  })
-
-  if (!primerMatch) {
+  if (!match) {
     cachedUsers = [];
+    return undefined;
   }
 
-  return await getMember(primerMatch, message);
+  return await getMember(match.id, message);
 }
 
 //get a member from string or id
