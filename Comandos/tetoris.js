@@ -27,6 +27,9 @@ prototype = {
         { name: "Top Global League:", value: (userSummary.league.standing == -1 ? "N/A" : userSummary.league.standing).toString(), inline: true },
         { name: "Top Local league:", value: (userSummary.league.standing_local == -1 ? "N/A" : userSummary.league.standing_local).toString(), inline: true },
         { name: '\u200b', value: '\u200b', inline: true },
+        { name: "League TR:", value: (userSummary.league.tr == -1 ? "N/A" : userSummary.league.standing).toString(), inline: true },
+        { name: "League ELO:", value: (userSummary.league.glicko == -1 ? "N/A" : userSummary.league.standing_local).toString(), inline: true },
+        { name: '\u200b', value: '\u200b', inline: true },
       );
     message.channel.send({ embeds: [embed] })
   },

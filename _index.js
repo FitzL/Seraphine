@@ -685,6 +685,7 @@ async function findOneMember(keyword, message) {
   keyword = keyword.toLowerCase();
 
   let guildMembers = cachedUsers;
+  console.log(cachedUsers)
 
   if (guildMembers.length === 0) {
     guildMembers = [...message.guild.members.cache.values()];
