@@ -21,7 +21,7 @@ prototype = {
     setTimeout(async () => {
       _message = await _message.edit("Alguien saldrá herido...");
       console.log(_message.id)
-    }, 1_000)
+    }, 5_000)
 
 
     setTimeout(async () => {
@@ -34,7 +34,7 @@ prototype = {
         message.channel.send("Me robo " + system.currency + "50 de <@" + randomTarget.id + ">")
         console.log(e)
       }
-    }, 2_000)
+    }, 10_000)
   },
   init: async (args, message, client, system) => {
     console.log(this);
