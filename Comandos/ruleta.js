@@ -2,9 +2,9 @@ const { Command } = require("../modulos/MCommand.js");
 
 prototype = {
   alias: ["ruleta", "rr", "roulette"], //nombre del comando
-  descripcion: "Check ping!", // que hace
+  descripcion: "Mutea de forma aleatoria a alguien del chat", // que hace
   costo: 30, //cuanto cuesta
-  testing: true, //se está probando?
+  testing: false, //se está probando?
   callback: async (args, message, client, system) => {
     let options = await message.channel.messages.fetch({ limit: 50 })
 
