@@ -1,7 +1,7 @@
 const { Command } = require("../modulos/MCommand.js");
 
 prototype = {
-  alias: ["ruleta", "rr"], //nombre del comando
+  alias: ["ruleta", "rr", "roulette"], //nombre del comando
   descripcion: "Check ping!", // que hace
   costo: 30, //cuanto cuesta
   testing: true, //se está probando?
