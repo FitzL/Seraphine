@@ -26,11 +26,11 @@ const client = new Client({
   ]
 });
 
-const { ownerid, token, botadmins } = require('./secret.json');
+const { ownerid, token, botadmins, BraveKey } = require('./secret.json');
 const { dbUser, mongoClient, Timer, Effect } = require('./db/db.js');
 const { channel } = require('diagnostics_channel');
 let comandos = [];
-let tiempoDesdeUltimoComando = Date.now();
+let tiempoDesdeUltimoComando = 0;
 
 let ultimoPersonaje = 0;
 let rechazos = [
@@ -91,6 +91,7 @@ var sistema = {
   altPrefix: altPrefix,
   findOneMember: findOneMember,
   logChannel: null,
+  braveKey: BraveKey
 }
 
 const everyjuan = new RegExp("@everyone|@here|<@&..+>", "gi");
@@ -502,12 +503,16 @@ client.on('messageCreate', async (message) => {
 
   //react if mentioned
 
-  if (message.content.toLowerCase().match(ser)) message.react("<:kyuserio:1317896754422616144>");
-  if (message.content.toLowerCase().match(balatro)) message.react("🃏");
-  if (message.content.toLowerCase().match(lichessGame)) {
+  var cc = message.content.toLowerCase();
+
+  if (cc.match(ser)) message.react("<:kyuserio:1317896754422616144>");
+  if (cc.match(balatro)) message.react("🃏");
+  if (cc.match(lichessGame)) {
     await message.channel.send(await LichessGiffer(message.content));
   };
-  if (message.content.toLowerCase().match(xitter)) {
+
+  if (cc.substring(cc.length - 3).match())
+  if (cc.match(xitter)) {
     await message.channel.send(GirlCock(message.content));
     return //await message.delete();
   };
@@ -552,7 +557,7 @@ client.on('messageCreate', async (message) => {
       }
 
       // command cooldown
-      if (((message.createdTimestamp - tiempoDesdeUltimoComando)) < 1_250) {
+      if (((message.createdTimestamp - tiempoDesdeUltimoComando)) < 500) {
         return message.reply("Dame un segundo.").then(m => { setTimeout(() => { m.delete() }, 3_500) });
       }
 
