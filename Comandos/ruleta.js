@@ -1,10 +1,10 @@
-const { Command } = require("../modulos/MCommand.js");
+Ôªøconst { Command } = require("../modulos/MCommand.js");
 
 prototype = {
   alias: ["ruleta", "rr", "roulette"], //nombre del comando
   descripcion: "Mutea de forma aleatoria a alguien del chat", // que hace
   costo: 30, //cuanto cuesta
-  testing: false, //se est· probando?
+  testing: false, //se est√° probando?
   callback: async (args, message, client, system) => {
     let options = await message.channel.messages.fetch({ limit: 50 })
 
@@ -14,12 +14,12 @@ prototype = {
 
     let randomTarget = targets[~~(Math.random() * targets.length)];
 
-    _message = await message.reply("La pistola est· girando...");
+    _message = await message.reply("La pistola est√° girando...");
 
     console.log(_message.id)
 
     setTimeout(async () => {
-      _message = await _message.edit("Alguien saldr· herido...");
+      _message = await _message.edit("Alguien saldr√° herido...");
       console.log(_message.id)
     }, 5_000)
 
@@ -30,7 +30,7 @@ prototype = {
         await _message.edit("<@" + randomTarget.id + "> ha sido eliminada/o (por 2 minutos).");
       } catch (e) {
         await _message.edit("Se me ha atascado la pistola... <:kyuserio:1317896754422616144>");
-        system.mongoclient.transferCurrency(message.author.id, client.user.id, 50)
+        system.mongoclient.transferCurrency(randomTarget.id, client.user.id, 50)
         message.channel.send("Me robo " + system.currency + "50 de <@" + randomTarget.id + ">")
         console.log(e)
       }
