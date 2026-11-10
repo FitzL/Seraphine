@@ -214,7 +214,7 @@ client.once('ready', async () => {
     log.send("time's up in " + "<#" + timer.channelId + "> for <@" + timer.owner + ">!")
   }
 
-  function handleTaxes(timer) {
+  async function handleTaxes(timer) {
     log.send("nom nom");
 
     await mongoClient.updateTimer(timer._id, "createdAt", Date.now());
