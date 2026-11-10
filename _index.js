@@ -179,93 +179,109 @@ client.once('ready', async () => {
 
   //handle timers
 
+  async function handleTimer(timer) {
+    if (timer.handled) {
+      console.log(
+        "Deleting timer",
+        timer._id,
+        "handled:",
+        timer.handled,
+        "owner:",
+        timer.owner,
+        "channel:",
+        timer.channelId
+      );
+      await mongoClient.deleteTimer(timer._id);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function isTax(timer) {
+    return (timer.channelId == -1)
+  }
+
+  async function doTimerLogic(timer) {
+    await mongoClient.timers.findOneAndUpdate(
+      { _id: timer._id },
+      { $set: { handled: true } }
+    );
+    await mongoClient.updateTimer(timer._id, "createdAt", Date.now());
+    let timerChannel = client.channels.cache.get(timer.channelId);
+    await timerChannel.send(`Time's up <@${timer.owner}>!` + (timer.message || "\nForgot to leave a message fam <:angrydog:1127627394283491358>"));
+
+    log.send("time's up in " + "<#" + timer.channelId + "> for <@" + timer.owner + ">!")
+  }
+
+  function handleTaxes(timer) {
+    log.send("nom nom");
+
+    await mongoClient.updateTimer(timer._id, "createdAt", Date.now());
+
+    /*
+      Tax {
+        owner: taxPercent,
+        channelId: -1,
+        createdAt: lastTax,
+        message: taxMinimum,
+        duration: Date()
+      }
+
+        //ejemplo:
+{
+          "owner": 0.05,
+          "channelId": -1,
+          "createdAt": 0,
+          "message": 500,
+          "duration": 86400
+        }
+    */
+
+    let taxPercent = timer.owner;
+    let taxMinimum = timer.message;
+
+    let taxableUsers = await mongoClient.users.find({
+      _id: {
+        '$ne': client.user.id,
+      },
+      currency: {
+        '$gt': taxMinimum,
+      }
+    }).sort({
+      currency: -1,
+    }).toArray();
+
+    let totalTaxIncome = 0;
+
+    for (let user of taxableUsers) {
+      let taxAmount = ~~(user.currency * taxPercent);
+
+      console.log("" + taxAmount + " from " + user.username);
+      totalTaxIncome += taxAmount;
+
+      await mongoClient.transferCurrency(user._id, sistema.serafin._id, taxAmount);
+    }
+
+    await log.send("Miku gets: " + totalTaxIncome)
+  }
+
   // infinite loop, should run once a second
-  outer: while (true) {
+  while (true) {
     let timers = await mongoClient.getAllTimers();
 
     for (let timer of timers) {
       let time = timer.createdAt + timer.duration * 1000 - Date.now();
 
-      if (timer.handled) {
-        console.log(
-          "Deleting timer",
-          timer._id,
-          "handled:",
-          timer.handled,
-          "owner:",
-          timer.owner,
-          "channel:",
-          timer.channelId
-        );
-        await mongoClient.deleteTimer(timer._id);
-        continue outer;
-      }
+      let isHandled = await handleTimer(timer) //if timer was already dealt with
+
+      if (isHandled) continue;
 
       if (time < 0) {
-        if (timer.channelId == -1) {
-          // TAXES
-          log.send("nom nom");
 
-          await mongoClient.updateTimer(timer._id, "createdAt", Date.now());
+        if (isTax(timer)) await handleTaxes(timer);
 
-          /*
-            Tax {
-              owner: taxPercent,
-              channelId: -1,
-              createdAt: lastTax,
-              message: taxMinimum,
-              duration: Date()
-            }
-
-              //ejemplo:
-{
-                "owner": 0.05,
-                "channelId": -1,
-                "createdAt": 0,
-                "message": 500,
-                "duration": 86400
-              }
-          */
-
-          let taxPercent = timer.owner;
-          let taxMinimum = timer.message;
-
-          let taxableUsers = await mongoClient.users.find({
-            _id: {
-              '$ne': client.user.id,
-            },
-            currency: {
-              '$gt': taxMinimum,
-            }
-          }).sort({
-            currency: -1,
-          }).toArray();
-
-          let totalTaxIncome = 0;
-
-          for (let user of taxableUsers) {
-            let taxAmount = ~~(user.currency * taxPercent);
-
-            console.log("" + taxAmount + " from " + user.username);
-            totalTaxIncome += taxAmount;
-
-            await mongoClient.transferCurrency(user._id, sistema.serafin._id, taxAmount);
-          }
-
-          await log.send("Miku gets: " + totalTaxIncome)
-
-          continue outer;
-        }
-
-        await mongoClient.timers.findOneAndUpdate(
-          { _id: timer._id},
-          { $set: { handled: true } }
-        );
-        await mongoClient.updateTimer(timer._id, "createdAt", Date.now());
-        let timerChannel = client.channels.cache.get(timer.channelId);
-        await timerChannel.send(`Time's up <@${timer.owner}>!` + (timer.message || "\nForgot to leave a message fam <:angrydog:1127627394283491358>"));
-
-        log.send("time's up in " + "<#" + timer.channelId + "> for <@" + timer.owner + ">!")
+        else await doTimerLogic(timer);
       }
     }
     await sleep(10_000);
