@@ -282,9 +282,9 @@ client.once('ready', async () => {
         }
 
         else {
-          await doTimerLogic(timer);
           let isHandled = await handleTimer(timer) //if timer was already dealt 
           if (isHandled) continue;
+          await doTimerLogic(timer);
         }
       }
     }
