@@ -229,7 +229,7 @@ client.once('ready', async () => {
       }
 
         //ejemplo:
-{
+        {
           "owner": 0.05,
           "channelId": -1,
           "createdAt": 0,
