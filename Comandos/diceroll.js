@@ -68,9 +68,14 @@ prototype = {
       .setDescription(results.join(" "))
       .setColor(message.member.displayColor)
 
-    message.channel.send({
-      embeds: [outputEmbed],
-    });
+    let _message = message.channel.send("Lanzando " + dice.length + " dados...");
+
+    setTimeout(() => {
+      message.edit({
+        content: null,
+        embeds: [outputEmbed],
+      });
+    }, Math.random() * dice.length * 1000 + 1000)
   },
   init: async (args, message, client, system) => {
     console.log("hellow world")

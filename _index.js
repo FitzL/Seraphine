@@ -273,15 +273,19 @@ client.once('ready', async () => {
     for (let timer of timers) {
       let time = timer.createdAt + timer.duration * 1000 - Date.now();
 
-      let isHandled = await handleTimer(timer) //if timer was already dealt with
-
-      if (isHandled) continue;
 
       if (time < 0) {
 
-        if (isTax(timer)) await handleTaxes(timer);
+        if (isTax(timer)) {
+          await handleTaxes(timer);
+          continue;
+        }
 
-        else await doTimerLogic(timer);
+        else {
+          await doTimerLogic(timer);
+          let isHandled = await handleTimer(timer) //if timer was already dealt 
+          if (isHandled) continue;
+        }
       }
     }
     await sleep(10_000);
